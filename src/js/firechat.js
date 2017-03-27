@@ -286,12 +286,13 @@
   };
 
   // Create and automatically enter a new chat room.
-  Firechat.prototype.createRoom = function(roomName, roomType, callback) {
+  Firechat.prototype.createRoom = function(roomId, roomName, roomType, callback) {
     var self = this,
-        newRoomRef = this._roomRef.push();
+        newRoomRef = this._roomRef.child(roomId).set({});
 
     var newRoom = {
-      id: newRoomRef.key,
+      // id: newRoomRef.key,
+      id: roomId,
       name: roomName,
       type: roomType || 'public',
       createdByUserId: this._userId,
@@ -303,41 +304,48 @@
       newRoom.authorizedUsers[this._userId] = true;
     }
 
-    newRoomRef.set(newRoom, function(error) {
+    // newRoomRef.set(newRoom, function(error) {
+    this._roomRef.child(roomId).set(newRoom, function(error) {
       if (!error) {
-        self.enterRoom(newRoomRef.key);
+        // self.enterRoom(newRoomRef.key);
+        self.enterRoom(roomId);
       }
       if (callback) {
-        callback(newRoomRef.key);
+        // callback(newRoomRef.key);
+        callback(roomId);
       }
     });
   };
 
   // Enter a chat room.
-  Firechat.prototype.enterRoom = function(roomId) {
+  Firechat.prototype.enterRoom = function(_roomId, _roomName, _roomType) {
     var self = this;
-    self.getRoom(roomId, function(room) {
+    self.getRoom(_roomId, function(room) {
+      console.log("room", room);
+      if ( ! room ) {
+        self.createRoom(_roomId, _roomName, _roomType);
+      }
       var roomName = room.name;
 
-      if (!roomId || !roomName) return;
+      if (!_roomId || !roomName) return;
 
       // Skip if we're already in this room.
-      if (self._rooms[roomId]) {
+      if (self._rooms[_roomId]) {
         return;
       }
 
-      self._rooms[roomId] = true;
+      self._rooms[_roomId] = true;
 
       if (self._user) {
         // Save entering this room to resume the session again later.
-        self._userRef.child('rooms').child(roomId).set({
-          id: roomId,
+        self._userRef.child('rooms').child(_roomId).set({
+          id: _roomId,
           name: roomName,
           active: true
         });
 
         // Set presence bit for the room and queue it for removal on disconnect.
-        var presenceRef = self._firechatRef.child('room-users').child(roomId).child(self._userId).child(self._sessionId);
+        var presenceRef = self._firechatRef.child('room-users').child(_roomId).child(self._userId).child(self._sessionId);
         self._queuePresenceOperation(presenceRef, {
           id: self._userId,
           name: self._userName
@@ -345,21 +353,22 @@
       }
 
       // Invoke our callbacks before we start listening for new messages.
-      self._onEnterRoom({ id: roomId, name: roomName });
+      self._onEnterRoom({ id: _roomId, name: roomName });
 
       // Setup message listeners
-      self._roomRef.child(roomId).once('value', function(snapshot) {
-        self._messageRef.child(roomId).limitToLast(self._options.numMaxMessages).on('child_added', function(snapshot) {
-          self._onNewMessage(roomId, snapshot);
+      self._roomRef.child(_roomId).once('value', function(snapshot) {
+        self._messageRef.child(_roomId).orderByChild("timestamp").limitToLast(self._options.numMaxMessages).on('child_added', function(snapshot) {
+          self._onNewMessage(_roomId, snapshot);
         }, /* onCancel */ function() {
           // Turns out we don't have permission to access these messages.
-          self.leaveRoom(roomId);
+          self.leaveRoom(_roomId);
         }, /* context */ self);
 
-        self._messageRef.child(roomId).limitToLast(self._options.numMaxMessages).on('child_removed', function(snapshot) {
-          self._onRemoveMessage(roomId, snapshot);
+        self._messageRef.child(_roomId).orderByChild("timestamp").limitToLast(self._options.numMaxMessages).on('child_removed', function(snapshot) {
+          self._onRemoveMessage(_roomId, snapshot);
         }, /* onCancel */ function(){}, /* context */ self);
-      }, /* onFailure */ function(){}, self);
+      }, /* onFailure */ function(){
+      }, self);
     });
   };
 

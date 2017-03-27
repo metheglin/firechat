@@ -6,23 +6,23 @@
   }
 
   var root = this,
-      previousFirechatUI = root.FirechatUI;
+      previousMan2ManChatUI = root.Man2ManChatUI;
 
-  root.FirechatUI = FirechatUI;
+  root.Man2ManChatUI = Man2ManChatUI;
 
   if (!self.FirechatDefaultTemplates) {
     throw new Error("Unable to find chat templates!");
   }
 
-  function FirechatUI(firebaseRef, el, options) {
+  function Man2ManChatUI(firebaseRef, el, options) {
     var self = this;
 
     if (!firebaseRef) {
-      throw new Error('FirechatUI: Missing required argument `firebaseRef`');
+      throw new Error('Man2ManChatUI: Missing required argument `firebaseRef`');
     }
 
     if (!el) {
-      throw new Error('FirechatUI: Missing required argument `el`');
+      throw new Error('Man2ManChatUI: Missing required argument `el`');
     }
 
     options = options || {};
@@ -70,14 +70,14 @@
     this._bindDataEvents();
   }
 
-  // Run FirechatUI in *noConflict* mode, returning the `FirechatUI` variable to
-  // its previous owner, and returning a reference to the FirechatUI object.
-  FirechatUI.noConflict = function noConflict() {
-    root.FirechatUI = previousFirechatUI;
-    return FirechatUI;
+  // Run Man2ManChatUI in *noConflict* mode, returning the `Man2ManChatUI` variable to
+  // its previous owner, and returning a reference to the Man2ManChatUI object.
+  Man2ManChatUI.noConflict = function noConflict() {
+    root.Man2ManChatUI = previousMan2ManChatUI;
+    return Man2ManChatUI;
   };
 
-  FirechatUI.prototype = {
+  Man2ManChatUI.prototype = {
 
     _bindUIEvents: function() {
       // Chat-specific custom interactions and functionality.
@@ -87,8 +87,6 @@
       this._bindForUserRoomList();
       this._bindForUserSearch();
       this._bindForUserMuting();
-      this._bindForChatInvites();
-      this._bindForRoomListing();
 
       // Generic, non-chat-specific interactive elements.
       this._setupTabs();
@@ -230,7 +228,7 @@
    * This method assumes that the underlying Firebase reference has
    * already been authenticated.
    */
-  FirechatUI.prototype.setUser = function(userId, userName) {
+  Man2ManChatUI.prototype.setUser = function(userId, userName, callback) {
     var self = this;
 
     // Initialize data events
@@ -241,14 +239,18 @@
         self._bindSuperuserUIEvents();
       }
 
-      self._chat.resumeSession();
+      if ( callback ) {
+        callback( self );
+      } else {
+        self._chat.resumeSession();
+      }
     });
   };
 
   /**
    * Exposes internal chat bindings via this external interface.
    */
-  FirechatUI.prototype.on = function(eventType, cb) {
+  Man2ManChatUI.prototype.on = function(eventType, cb) {
     var self = this;
 
     this._chat.on(eventType, cb);
@@ -258,7 +260,7 @@
    * Binds a custom context menu to messages for superusers to warn or ban
    * users for violating terms of service.
    */
-  FirechatUI.prototype._bindSuperuserUIEvents = function() {
+  Man2ManChatUI.prototype._bindSuperuserUIEvents = function() {
     var self = this,
         parseMessageVars = function(event) {
           var $this = $(this),
@@ -344,7 +346,7 @@
   /**
    * Binds to height changes in the surrounding div.
    */
-  FirechatUI.prototype._bindForHeightChange = function() {
+  Man2ManChatUI.prototype._bindForHeightChange = function() {
     var self = this,
         $el = $(this._el),
         lastHeight = null;
@@ -363,7 +365,7 @@
   /**
    * Binds custom inner-tab events.
    */
-  FirechatUI.prototype._bindForTabControls = function() {
+  Man2ManChatUI.prototype._bindForTabControls = function() {
     var self = this;
 
     // Handle click of tab close button.
@@ -377,7 +379,7 @@
   /**
    * Binds room list dropdown to populate room list on-demand.
    */
-  FirechatUI.prototype._bindForRoomList = function() {
+  Man2ManChatUI.prototype._bindForRoomList = function() {
     var self = this;
 
     $('#firechat-btn-rooms').bind('click', function() {
@@ -414,10 +416,19 @@
     });
   };
 
+  Man2ManChatUI.prototype.selectUserRoom = function(roomId, roomName) {
+    var self = this;
+    if (self.$messages[roomId]) {
+      self.focusTab(roomId);
+    } else {
+      self._chat.enterRoom(roomId, roomName);
+    }
+  };
+
   /**
    * Binds user list dropdown per room to populate user list on-demand.
    */
-  FirechatUI.prototype._bindForUserRoomList = function() {
+  Man2ManChatUI.prototype._bindForUserRoomList = function() {
     var self = this;
 
     // Upon click of the dropdown, autofocus the input field and trigger list population.
@@ -448,7 +459,7 @@
    * Binds user search buttons, dropdowns, and input fields for searching all
    * active users currently in chat.
    */
-  FirechatUI.prototype._bindForUserSearch = function() {
+  Man2ManChatUI.prototype._bindForUserSearch = function() {
     var self = this,
         handleUserSearchSubmit = function(event) {
           var $this = $(this),
@@ -536,7 +547,7 @@
   /**
    * Binds user mute toggles and removes all messages for a given user upon mute.
    */
-  FirechatUI.prototype._bindForUserMuting = function() {
+  Man2ManChatUI.prototype._bindForUserMuting = function() {
     var self = this;
     $(document).delegate('[data-event="firechat-user-mute-toggle"]', 'click', function(event) {
       var $this = $(this),
@@ -575,117 +586,11 @@
   };
 
   /**
-   * Binds to elements with the data-event='firechat-user-(private)-invite' and
-   * handles invitations as well as room creation and entering.
-   */
-  FirechatUI.prototype._bindForChatInvites = function() {
-    var self = this,
-        renderInvitePrompt = function(event) {
-          var $this = $(this),
-              userId = $this.closest('[data-user-id]').data('user-id'),
-              roomId = $this.closest('[data-room-id]').data('room-id'),
-              userName = $this.closest('[data-user-name]').data('user-name'),
-              template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
-              $prompt;
-
-          self._chat.getRoom(roomId, function(room) {
-            $prompt = self.prompt('Invite', template({
-              userName: userName,
-              roomName: room.name
-            }));
-
-            $prompt.find('a.close').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=decline]').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=accept]').first().click(function() {
-              $prompt.remove();
-              self._chat.inviteUser(userId, roomId, room.name);
-              return false;
-            });
-            return false;
-          });
-          return false;
-        },
-        renderPrivateInvitePrompt = function(event) {
-          var $this = $(this),
-              userId = $this.closest('[data-user-id]').data('user-id'),
-              userName = $this.closest('[data-user-name]').data('user-name'),
-              template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
-              $prompt;
-
-          if (userId && userName) {
-            $prompt = self.prompt('Private Invite', template({
-              userName: userName,
-              roomName: 'Private Chat'
-            }));
-
-            $prompt.find('a.close').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=decline]').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=accept]').first().click(function() {
-              $prompt.remove();
-              var roomName = 'Private Chat';
-              self._chat.createRoom(roomName, 'private', function(roomId) {
-                self._chat.inviteUser(userId, roomId, roomName);
-              });
-              return false;
-            });
-          }
-          return false;
-        };
-
-    $(document).delegate('[data-event="firechat-user-chat"]', 'click', renderPrivateInvitePrompt);
-    $(document).delegate('[data-event="firechat-user-invite"]', 'click', renderInvitePrompt);
-  };
-
-  /**
-   * Binds to room dropdown button, menu items, and create room button.
-   */
-  FirechatUI.prototype._bindForRoomListing = function() {
-    var self = this,
-        $createRoomPromptButton = $('#firechat-btn-create-room-prompt'),
-        $createRoomButton = $('#firechat-btn-create-room'),
-        renderRoomList = function(event) {
-          var type = $(this).data('room-type');
-
-          self.sortListLexicographically('#firechat-room-list');
-        };
-
-    // Handle click of the create new room prompt-button.
-    $createRoomPromptButton.bind('click', function(event) {
-      self.promptCreateRoom();
-      return false;
-    });
-
-    // Handle click of the create new room button.
-    $createRoomButton.bind('click', function(event) {
-      var roomName = $('#firechat-input-room-name').val();
-      $('#firechat-prompt-create-room').remove();
-      self._chat.createRoom(roomName);
-      return false;
-    });
-  };
-
-  /**
    * A stripped-down version of bootstrap-tab.js.
    *
    * Original bootstrap-tab.js Copyright 2012 Twitter, Inc.,licensed under the Apache v2.0
    */
-  FirechatUI.prototype._setupTabs = function() {
+  Man2ManChatUI.prototype._setupTabs = function() {
     var self = this,
         show = function($el) {
           var $this = $el,
@@ -765,7 +670,7 @@
    *
    * Original bootstrap-dropdown.js Copyright 2012 Twitter, Inc., licensed under the Apache v2.0
    */
-  FirechatUI.prototype._setupDropdowns = function() {
+  Man2ManChatUI.prototype._setupDropdowns = function() {
     var self = this,
         toggle = '[data-toggle=firechat-dropdown]',
         toggleDropdown = function(event) {
@@ -818,7 +723,7 @@
    * content to reflect the number of characters remaining, as the 'maxlength'
    * attribute less the current value length.
    */
-  FirechatUI.prototype._bindTextInputFieldLimits = function() {
+  Man2ManChatUI.prototype._bindTextInputFieldLimits = function() {
     $('body').delegate('input[data-provide="limit"], textarea[data-provide="limit"]', 'keyup', function(event) {
       var $this = $(this),
           $target = $($this.data('counter')),
@@ -835,7 +740,7 @@
    * @param    {string}    title
    * @param    {string}    message
    */
-  FirechatUI.prototype.renderAlertPrompt = function(title, message) {
+  Man2ManChatUI.prototype.renderAlertPrompt = function(title, message) {
     var template = FirechatDefaultTemplates["templates/prompt-alert.html"],
         $prompt = this.prompt(title, template({ message: message }));
 
@@ -849,7 +754,7 @@
   /**
    * Toggle input field s if we want limit / unlimit input fields.
    */
-  FirechatUI.prototype.toggleInputs = function(isEnabled) {
+  Man2ManChatUI.prototype.toggleInputs = function(isEnabled) {
     $('#firechat-tab-content textarea').each(function() {
       var $this = $(this);
       if (isEnabled) {
@@ -868,7 +773,7 @@
    * @param    {string}    roomId
    * @param    {string}    roomName
    */
-  FirechatUI.prototype.attachTab = function(roomId, roomName) {
+  Man2ManChatUI.prototype.attachTab = function(roomId, roomName) {
     var self = this;
 
     // If this tab already exists, give it focus.
@@ -935,7 +840,7 @@
    *
    * @param    {string}    roomId
    */
-  FirechatUI.prototype.focusTab = function(roomId) {
+  Man2ManChatUI.prototype.focusTab = function(roomId) {
     if (this.$messages[roomId]) {
       var $tabLink = this.$tabList.find('[data-room-id=' + roomId + ']').find('a');
       if ($tabLink.length) {
@@ -949,7 +854,7 @@
    *
    * @param    {string}    roomId
    */
-  FirechatUI.prototype.removeTab = function(roomId) {
+  Man2ManChatUI.prototype.removeTab = function(roomId) {
     delete this.$messages[roomId];
 
     // Remove the inner tab content.
@@ -976,7 +881,7 @@
    * @param    {string}    roomId
    * @param    {string}    message
    */
-  FirechatUI.prototype.showMessage = function(roomId, rawMessage) {
+  Man2ManChatUI.prototype.showMessage = function(roomId, rawMessage) {
     var self = this;
 
     // Setup defaults
@@ -1033,7 +938,7 @@
    * @param    {string}    roomId
    * @param    {string}    messageId
    */
-  FirechatUI.prototype.removeMessage = function(roomId, messageId) {
+  Man2ManChatUI.prototype.removeMessage = function(roomId, messageId) {
     $('.message[data-message-id="' + messageId + '"]').remove();
   };
 
@@ -1042,7 +947,7 @@
    *
    * @param    {string}    selector
    */
-  FirechatUI.prototype.sortListLexicographically = function(selector) {
+  Man2ManChatUI.prototype.sortListLexicographically = function(selector) {
     $(selector).children("li").sort(function(a, b) {
         var upA = $(a).text().toUpperCase();
         var upB = $(b).text().toUpperCase();
@@ -1058,7 +963,7 @@
    * @param    {number}    length
    * @return   {string}
    */
-  FirechatUI.prototype.trimWithEllipsis = function(str, length) {
+  Man2ManChatUI.prototype.trimWithEllipsis = function(str, length) {
     str = str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
     return (length && str.length <= length) ? str : str.substring(0, length) + '...';
   };
@@ -1070,7 +975,7 @@
    * @param    {Number}    timestamp
    * @param    {string}    date
    */
-  FirechatUI.prototype.formatTime = function(timestamp) {
+  Man2ManChatUI.prototype.formatTime = function(timestamp) {
     var date = (timestamp) ? new Date(timestamp) : new Date(),
         hours = date.getHours() || 12,
         minutes = '' + date.getMinutes(),
@@ -1082,50 +987,11 @@
   };
 
   /**
-   * Launch a prompt to allow the user to create a new room.
-   */
-  FirechatUI.prototype.promptCreateRoom = function() {
-    var self = this;
-    var template = FirechatDefaultTemplates["templates/prompt-create-room.html"];
-
-    var $prompt = this.prompt('Create Public Room', template({
-      maxLengthRoomName: this.maxLengthRoomName,
-      isModerator: self._chat.userIsModerator()
-    }));
-    $prompt.find('a.close').first().click(function() {
-      $prompt.remove();
-      return false;
-    });
-
-
-    $prompt.find('[data-toggle=submit]').first().click(function() {
-      var name = $prompt.find('[data-input=firechat-room-name]').first().val();
-      if (name !== '') {
-        self._chat.createRoom(name, 'public');
-        $prompt.remove();
-      }
-      return false;
-    });
-
-    $prompt.find('[data-input=firechat-room-name]').first().focus();
-    $prompt.find('[data-input=firechat-room-name]').first().bind('keydown', function(e) {
-      if (e.which === 13) {
-        var name = $prompt.find('[data-input=firechat-room-name]').first().val();
-        if (name !== '') {
-          self._chat.createRoom(name, 'public');
-          $prompt.remove();
-          return false;
-        }
-      }
-    });
-  };
-
-  /**
    * Inner method to launch a prompt given a specific title and HTML content.
    * @param    {string}    title
    * @param    {string}    content
    */
-  FirechatUI.prototype.prompt = function(title, content) {
+  Man2ManChatUI.prototype.prompt = function(title, content) {
     var template = FirechatDefaultTemplates["templates/prompt.html"],
         $prompt;
 
@@ -1142,7 +1008,7 @@
   };
 
   // see http://stackoverflow.com/questions/37684/how-to-replace-plain-urls-with-links
-  FirechatUI.prototype.linkify = function(str) {
+  Man2ManChatUI.prototype.linkify = function(str) {
     var self = this;
     return str
       .replace(self.urlPattern, '<a target="_blank" href="$&">$&</a>')

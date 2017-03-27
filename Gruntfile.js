@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 
     // A list of files which will be syntax-checked by JSHint.
     jshint: {
-      files: ['src/js/shims.js', 'src/js/firechat.js', 'src/js/firechat-ui.js'],
+      files: ['src/js/shims.js', 'src/js/firechat.js', 'src/js/man2manchat-ui.js'],
       options: {
         regexdash: false
       }
@@ -55,15 +55,15 @@ module.exports = function(grunt) {
           'compiled/templates.js',
           'src/js/shims.js',
           'src/js/firechat.js',
-          'src/js/firechat-ui.js'
+          'src/js/man2manchat-ui.js'
         ],
-        dest: 'dist/firechat.js'
+        dest: 'dist/man2manchat.js'
       }
     },
 
     // Minify concatenated files.
     uglify: {
-      'dist/firechat.min.js': ['dist/firechat.js'],
+      'dist/man2manchat.min.js': ['dist/man2manchat.js'],
     },
 
     // Clean up temporary files.
