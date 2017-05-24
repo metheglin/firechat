@@ -895,6 +895,7 @@
       id              : rawMessage.id,
       localtime       : self.formatTime(rawMessage.timestamp),
       message         : rawMessage.message || '',
+      image           : rawMessage.image || null,
       userId          : rawMessage.userId,
       name            : rawMessage.name,
       type            : rawMessage.type || 'default',
