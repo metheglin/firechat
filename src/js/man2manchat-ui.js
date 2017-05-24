@@ -1,5 +1,6 @@
 (function($) {
 
+  var dam = new LastDamGate( /*fps=*/0.6 );
 
   if (!$ || (parseInt($().jquery.replace(/\./g, ""), 10) < 170)) {
     throw new Error("jQuery 1.7 or later required!");
@@ -151,6 +152,11 @@
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
         this.showMessage(roomId, message);
       }
+      // this._chat.markAsRead( room.id );
+      dam.execute(function(){
+        console.log("_onNewMessage");
+        this._chat.markAsRead( roomId );
+      }.bind(this));
     },
     _onRemoveMessage: function(roomId, messageId) {
       this.removeMessage(roomId, messageId);

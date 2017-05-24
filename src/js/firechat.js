@@ -51,6 +51,7 @@
     this._moderatorsRef  = this._firechatRef.child('moderators');
     this._suspensionsRef = this._firechatRef.child('suspensions');
     this._usersOnlineRef = this._firechatRef.child('user-names-online');
+    this._staffUnreadRoomsRef = this._firechatRef.child('staff-unread-rooms');
 
     // Setup and establish default options.
     this._options = options || {};
@@ -650,5 +651,9 @@
         console.log(msg);
       }
     }
+  };
+
+  Firechat.prototype.markAsRead = function( roomId ) {
+    this._staffUnreadRoomsRef.child(roomId).remove();
   };
 })();
