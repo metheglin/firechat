@@ -451,7 +451,8 @@
       self._chat.getUsersByRoom(roomId, function(users) {
         for (var username in users) {
           user = users[username];
-          user.disableActions = (!self._user || user.id === self._user.id);
+          // user.disableActions = (!self._user || user.id === self._user.id);
+          user.disableActions = true;
           user.nameTrimmed = self.trimWithEllipsis(user.name, self.maxLengthUsernameDisplay);
           user.isMuted = (self._user && self._user.muted && self._user.muted[user.id]);
           $target.append($(template(user)));
@@ -496,7 +497,8 @@
               var user = users[username];
 
               // Disable buttons for <me>.
-              user.disableActions = (!self._user || user.id === self._user.id);
+              // user.disableActions = (!self._user || user.id === self._user.id);
+              user.disableActions = true;
 
               numResults += 1;
 
@@ -900,7 +902,8 @@
       name            : rawMessage.name,
       type            : rawMessage.type || 'default',
       isSelfMessage   : (self._user && rawMessage.userId == self._user.id),
-      disableActions  : (!self._user || rawMessage.userId == self._user.id)
+      // disableActions  : (!self._user || rawMessage.userId == self._user.id)
+      disableActions  : true
     };
 
     // While other data is escaped in the Underscore.js templates, escape and
