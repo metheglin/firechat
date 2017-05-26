@@ -552,6 +552,23 @@
     });
   };
 
+  Firechat.prototype.getUnreadRoomList = function(cb) {
+    var self = this;
+
+    // self._roomRef.once('value', function(snapshot) {
+    //   cb(snapshot.val());
+    // });
+
+    // self._staffUnreadRoomsRef.limitToLast(30).on('child_added', function(snapshot) {
+    //   console.log("unread room fetched", snapshot.val());
+    //   cb(snapshot.val());
+    // });
+    self._staffUnreadRoomsRef.limitToLast(30).on('value', function(snapshot) {
+      console.log("unread room fetched", snapshot.val());
+      cb(snapshot.val());
+    });
+  };
+
   Firechat.prototype.getUsersByRoom = function() {
     var self = this,
         roomId = arguments[0],

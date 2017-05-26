@@ -1,11 +1,12 @@
 <div id='firechat' class='full'>
   <div id='firechat-header' class='clearfix'>
+
     <div class='clearfix'>
 
       <div class='half firechat-dropdown' style=''>
         <a id='firechat-btn-rooms' class='firechat-dropdown-toggle btn full' data-toggle="firechat-dropdown" href='#'>
           <span class='icon user-chat'></span>
-          Chat Rooms
+          最近のチャット
           <span class='caret'></span>
         </a>
         <div class='firechat-dropdown-menu full' role='menu'>
@@ -19,6 +20,25 @@
         </div>
 
       </div>
+
+      <div class='half firechat-dropdown' style=''>
+        <a 
+          id='firechat-btn-unread-rooms' 
+          class='firechat-dropdown-toggle btn full' 
+          data-toggle="firechat-dropdown" 
+          href='#'>
+          <span class='icon user-chat'></span>
+          未読のチャット
+          <span class='caret'></span>
+        </a>
+        <div class='firechat-dropdown-menu full' role='menu'>
+
+          <ul id='firechat-unread-room-list'></ul>
+
+        </div>
+
+      </div>
+      
       <!-- <div class='half firechat-dropdown' style=''>
         <a data-event='firechat-user-search-btn' class='btn full firechat-dropdown-toggle' data-toggle="firechat-dropdown" href='#'>
           <span class='icon user-group'></span>

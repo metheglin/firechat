@@ -52,6 +52,7 @@
     // Grab shortcuts to commonly used jQuery elements.
     this.$wrapper = $('#firechat');
     this.$roomList = $('#firechat-room-list');
+    this.$unreadRoomList = $('#firechat-unread-room-list');
     this.$tabList = $('#firechat-tab-list');
     this.$tabContent = $('#firechat-tab-content');
     this.$messages = {};
@@ -85,6 +86,7 @@
       this._bindForHeightChange();
       this._bindForTabControls();
       this._bindForRoomList();
+      this._bindForUnreadRoomList();
       this._bindForUserRoomList();
       this._bindForUserSearch();
       this._bindForUserMuting();
@@ -152,11 +154,6 @@
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
         this.showMessage(roomId, message);
       }
-      // this._chat.markAsRead( room.id );
-      dam.execute(function(){
-        console.log("_onNewMessage");
-        this._chat.markAsRead( roomId );
-      }.bind(this));
     },
     _onRemoveMessage: function(roomId, messageId) {
       this.removeMessage(roomId, messageId);
@@ -417,6 +414,46 @@
           var $roomItem = $(template(room));
           $roomItem.children('a').bind('click', selectRoomListItem);
           self.$roomList.append($roomItem.toggle(true));
+        }
+      });
+    });
+  };
+
+  Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
+    var self = this;
+
+    $('#firechat-btn-unread-rooms').bind('click', function() {
+      if ($(this).parent().hasClass('open')) {
+        return;
+      }
+
+      var $this = $(this),
+          template = FirechatDefaultTemplates["templates/room-list-item.html"],
+          selectRoomListItem = function() {
+            var parent = $(this).parent(),
+                roomId = parent.data('room-id'),
+                roomName = parent.data('room-name');
+
+            if (self.$messages[roomId]) {
+              self.focusTab(roomId);
+            } else {
+              self._chat.enterRoom(roomId, roomName);
+            }
+            return false;
+          };
+
+      self._chat.getUnreadRoomList(function(rooms) {
+        self.$unreadRoomList.empty();
+        for (var roomId in rooms) {
+          var room = rooms[roomId];
+          room.id   = roomId;
+          room.type = "public";
+          room.name = room.name ? room.name : "不明のチャット";
+          room.isRoomOpen = false;
+          if (room.type != "public") continue;
+          var $roomItem = $(template(room));
+          $roomItem.children('a').bind('click', selectRoomListItem);
+          self.$unreadRoomList.append($roomItem.toggle(true));
         }
       });
     });
@@ -823,6 +860,25 @@
     // Attach on-shown event to move tab to front and scroll to bottom.
     $tab.bind('shown', function(event) {
       $messages.scrollTop($messages[0].scrollHeight);
+      
+      $messages.scroll(function(event) {
+        var $this = $(this),
+            roomId = $this.closest('[data-room-id]').data('room-id');
+
+        dam.execute(function(){
+          var elem = $this.get(0);
+          console.log("test", roomId, {
+            scrollTop: elem.scrollTop,
+            scrollHeight: elem.scrollHeight,
+            clientHeight: elem.clientHeight
+          });
+          if ( self.isAtBottom(elem) ) {
+            console.log("Marked as read.", roomId);
+            self._chat.markAsRead( roomId );
+          }
+          
+        });
+      });
     });
 
     // Dynamically update the width of each tab based upon the number open.
@@ -1023,6 +1079,10 @@
     return str
       .replace(self.urlPattern, '<a target="_blank" href="$&">$&</a>')
       .replace(self.pseudoUrlPattern, '$1<a target="_blank" href="http://$2">$2</a>');
+  };
+
+  Man2ManChatUI.prototype.isAtBottom = function(elem) {
+    return ( elem.scrollTop + elem.clientHeight >= elem.scrollHeight - /* buffer */10 );
   };
 
 })(jQuery);
