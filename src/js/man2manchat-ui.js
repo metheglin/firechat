@@ -49,6 +49,8 @@
 
     this._renderLayout();
 
+    this._sendCallback = undefined;
+
     // Grab shortcuts to commonly used jQuery elements.
     this.$wrapper = $('#firechat');
     this.$roomList = $('#firechat-room-list');
@@ -847,7 +849,11 @@
       var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
       if ((e.which === 13) && (message !== '')) {
         $textarea.val('');
-        self._chat.sendMessage(roomId, message);
+        self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
+          roomId: roomId,
+          roomName: roomName,
+          message: message
+        }));
         return false;
       }
     });
@@ -1083,6 +1089,11 @@
 
   Man2ManChatUI.prototype.isAtBottom = function(elem) {
     return ( elem.scrollTop + elem.clientHeight >= elem.scrollHeight - /* buffer */10 );
+  };
+
+  Man2ManChatUI.prototype.setSendCallback = function(cb) {
+    var self = this;
+    self._sendCallback = cb;
   };
 
 })(jQuery);
