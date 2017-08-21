@@ -979,6 +979,7 @@
         return _.escape(token);
       }
     }).join(' ');
+    message.message = self.linify(message.message);
     message.message = self.trimWithEllipsis(message.message, self.maxLengthMessage);
 
     // Populate and render the message template.
@@ -1085,6 +1086,11 @@
     return str
       .replace(self.urlPattern, '<a target="_blank" href="$&">$&</a>')
       .replace(self.pseudoUrlPattern, '$1<a target="_blank" href="http://$2">$2</a>');
+  };
+
+  Man2ManChatUI.prototype.linify = function(str) {
+    var self = this;
+    return str.replace(/\n/g, '<br>');
   };
 
   Man2ManChatUI.prototype.isAtBottom = function(elem) {
