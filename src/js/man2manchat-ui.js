@@ -839,6 +839,7 @@
     var $tabContent = $(tabTemplate(room));
     this.$tabContent.prepend($tabContent);
     var $messages = $('#firechat-messages' + roomId);
+    var $btnMarkRead = $("#btn-mark-read-" + roomId);
 
     // Keep a reference to the message listing for later use.
     this.$messages[roomId] = $messages;
@@ -867,24 +868,30 @@
     $tab.bind('shown', function(event) {
       $messages.scrollTop($messages[0].scrollHeight);
       
-      $messages.scroll(function(event) {
-        var $this = $(this),
-            roomId = $this.closest('[data-room-id]').data('room-id');
-
-        dam.execute(function(){
-          var elem = $this.get(0);
-          console.log("test", roomId, {
-            scrollTop: elem.scrollTop,
-            scrollHeight: elem.scrollHeight,
-            clientHeight: elem.clientHeight
-          });
-          if ( self.isAtBottom(elem) ) {
-            console.log("Marked as read.", roomId);
-            self._chat.markAsRead( roomId );
-          }
-          
-        });
+      $btnMarkRead.on("click", function(){
+        console.log("marked as READ:", roomId);
+        self.doMarkAsRead( roomId );
       });
+      // MEMO: markAsReadはスクロールによって自動反映せず、
+      //       既読にするボタンを設けて、手動更新させる
+      // $messages.scroll(function(event) {
+      //   var $this = $(this),
+      //       roomId = $this.closest('[data-room-id]').data('room-id');
+
+      //   dam.execute(function(){
+      //     var elem = $this.get(0);
+      //     console.log("test", roomId, {
+      //       scrollTop: elem.scrollTop,
+      //       scrollHeight: elem.scrollHeight,
+      //       clientHeight: elem.clientHeight
+      //     });
+      //     if ( self.isAtBottom(elem) ) {
+      //       console.log("Marked as read.", roomId);
+      //       self._chat.markAsRead( roomId );
+      //     }
+          
+      //   });
+      // });
     });
 
     // Dynamically update the width of each tab based upon the number open.
@@ -1100,6 +1107,11 @@
   Man2ManChatUI.prototype.setSendCallback = function(cb) {
     var self = this;
     self._sendCallback = cb;
+  };
+
+  Man2ManChatUI.prototype.doMarkAsRead = function(roomId) {
+    var self= this;
+    self._chat.markAsRead( roomId );
   };
 
 })(jQuery);
