@@ -40,7 +40,7 @@
     this.maxLengthUsername = 15;
     this.maxLengthUsernameDisplay = 15;
     this.maxLengthRoomName = 24;
-    this.maxLengthMessage = 120;
+    this.maxLengthMessage = 1500;
     this.maxUserSearchResults = 100;
 
     // Define some useful regexes.
@@ -1055,7 +1055,7 @@
 
     hours = (hours > 12) ? hours - 12 : hours;
     minutes = (minutes.length < 2) ? '0' + minutes : minutes;
-    return '' + hours + ':' + minutes + ampm;
+    return date.toLocaleDateString() + " " + hours + ':' + minutes + ampm;
   };
 
   /**
