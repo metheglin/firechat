@@ -849,13 +849,15 @@
     $textarea.bind('keydown', function(e) {
       var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
       if ((e.which === 13) && (message !== '')) {
-        $textarea.val('');
-        self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
-          roomId: roomId,
-          roomName: roomName,
-          message: message
-        }));
-        return false;
+        if(!e.shiftKey){
+          $textarea.val('');
+          self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
+            roomId: roomId,
+            roomName: roomName,
+            message: message
+          }));
+          return false;
+        }
       }
     });
 
