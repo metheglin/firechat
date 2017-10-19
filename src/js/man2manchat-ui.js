@@ -152,9 +152,18 @@
       }
     },
     _onNewMessage: function(roomId, message) {
+      var self = this;
       var userId = message.userId;
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
-        this.showMessage(roomId, message);
+        if(message['image']){
+          var storageRef = firebase.storage().ref(message['image']);
+          storageRef.getDownloadURL().then(function(url) {
+            message['image'] = url;
+            self.showMessage(roomId, message);
+          });
+        }else{
+          this.showMessage(roomId, message);
+        }
       }
     },
     _onRemoveMessage: function(roomId, messageId) {
@@ -860,6 +869,31 @@
         }
       }
     });
+
+     // Image Upload
+    var uploadImg = document.getElementById('uploadImg');
+    uploadImg.addEventListener('change', function(e){
+      var file = e.target.files[0];
+      if(file){
+        var filepath = 'images/'+file.name;
+        var storageRef = firebase.storage().ref(filepath);
+        var task = storageRef.put(file);
+
+        task.on('state_changed',
+          function progress(snapshot){},
+          function error(err){},
+          function complete(){
+            uploadImg.value = "";
+            self._chat.sendMessage(roomId, filepath, 'image', self._sendCallback.bind(self, {
+              roomId: roomId,
+              roomName: roomName,
+              message: null
+            }));
+          }
+        );
+      }
+    })
+
 
     // Populate and render the tab menu template.
     var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
