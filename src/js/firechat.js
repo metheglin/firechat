@@ -408,9 +408,9 @@
         newMessageRef;
 
         if(messageType == 'image'){
-          message['image'] = messageContent;
+          message.image = messageContent;
         }else{
-          message['message'] = messageContent;
+          message.message = messageContent;
         }
 
     if (!self._user) {

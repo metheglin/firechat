@@ -155,10 +155,10 @@
       var self = this;
       var userId = message.userId;
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
-        if(message['image']){
-          var storageRef = firebase.storage().ref(message['image']);
+        if(message.image){
+          var storageRef = firebase.storage().ref(message.image);
           storageRef.getDownloadURL().then(function(url) {
-            message['image'] = url;
+            message.image = url;
             self.showMessage(roomId, message);
           });
         }else{
@@ -892,7 +892,7 @@
           }
         );
       }
-    })
+    });
 
 
     // Populate and render the tab menu template.
