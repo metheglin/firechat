@@ -403,10 +403,15 @@
           userId: self._userId,
           name: self._userName,
           timestamp: firebase.database.ServerValue.TIMESTAMP,
-          message: messageContent,
           type: messageType || 'default'
         },
         newMessageRef;
+
+        if(messageType == 'image'){
+          message.image = messageContent;
+        }else{
+          message.message = messageContent;
+        }
 
     if (!self._user) {
       self._onAuthRequired();
