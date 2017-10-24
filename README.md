@@ -82,3 +82,40 @@ Firechat requires Firebase in order to authenticate users and store data. You ca
 
 If you have a question about Firechat, feel free to reach out through one of our
 [official support channels](https://firebase.google.com/support/?utm_source=firechat).
+
+## Required Setup
+
+```js
+var config = {
+  apiKey: "***",
+  authDomain: "***.firebaseio.com",
+  databaseURL: "https://***.firebaseio.com/",
+  storageBucket: "***.appspot.com",
+}
+firebase.initializeApp(config)
+```
+
+## Customize
+
+```js
+var chatRef = firebase.database().ref("chat");
+var chat = new Man2ManChatUI(chatRef, document.getElementById("firechat-wrapper"));
+```
+
+### Customizing File Uploading Target
+
+As default it uploads files to firebase storage, so you have to specify `storageBucket` in config at initializing firebase.
+However, it also supports custom file upload target. You can write original file uploading along with the Dropzone style. After a file uploaded, you should call `uploadCallback` which posts the fileUrl to a firebase chat message.
+
+```js
+chat.setDropzoneConfig(function(roomId, roomName, uploadCallback) {
+return {
+  url: "/upload",
+  maxFilesize: 20, // MB
+  accept: function(file, done) {
+    setTimeout(function(){
+      return uploadCallback( "https://i.ytimg.com/vi/SNggmeilXDQ/maxresdefault.jpg" );
+    }, 2000)
+  }
+};
+```

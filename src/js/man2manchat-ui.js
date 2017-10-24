@@ -50,7 +50,7 @@
     this._renderLayout();
 
     this._sendCallback = undefined;
-    this._dropzoneConfig = function(roomId, roomName) {
+    this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
         url: "/upload",
         maxFilesize: 20, // MB
@@ -65,11 +65,7 @@
               function progress(snapshot){},
               function error(err){},
               function complete(snapshot){
-                self._chat.sendImage(roomId, task.snapshot.downloadURL, self._sendCallback.bind(self, {
-                  roomId: roomId,
-                  roomName: roomName,
-                  message: null
-                }));
+                return uploadCallback( task.snapshot.downloadURL );
               }
             );
           }
@@ -897,7 +893,13 @@
     });
 
     // Initialize Image Uploader
-    var myDropzone = new Dropzone("#uploader", self._dropzoneConfig(roomId, roomName));
+    var myDropzone = new Dropzone("#uploader", self._dropzoneConfig(roomId, roomName, function( url ) {
+      self._chat.sendImage(roomId, url, self._sendCallback.bind(self, {
+        roomId: roomId,
+        roomName: roomName,
+        message: null
+      }));
+    }));
     // Dropzone.options.uploader = self._dropzoneConfig(roomId, roomName);
 
      // Image Upload
