@@ -57,13 +57,16 @@
         accept: function(file, done) {
           console.log("uploaded file", file);
           if ( file ) {
-            var filepath = 'images/' + file.name;
+            var fileNamePrefix = new Date().getTime()+Math.random().toString(36).substring(2, 10);
+            var filepath = 'images/' + fileNamePrefix + "_" + file.name;
             var storageRef = firebase.storage().ref(filepath);
             var task = storageRef.put(file);
 
             task.on('state_changed',
               function progress(snapshot){},
-              function error(err){},
+              function error(err){
+                alert('Something wrong with uploading. Please confirm the file less then 20MB.');
+              },
               function complete(snapshot){
                 return uploadCallback( task.snapshot.downloadURL );
               }
