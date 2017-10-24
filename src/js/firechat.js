@@ -425,6 +425,11 @@
     newMessageRef.setWithPriority(message, firebase.database.ServerValue.TIMESTAMP, cb);
   };
 
+  Firechat.prototype.sendImage = function(roomId, imageUrl, cb) {
+    var self = this;
+    return self.sendMessage(roomId, imageUrl, 'image', cb);
+  };
+
   Firechat.prototype.deleteMessage = function(roomId, messageId, cb) {
     var self = this;
 

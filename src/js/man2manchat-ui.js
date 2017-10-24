@@ -50,6 +50,32 @@
     this._renderLayout();
 
     this._sendCallback = undefined;
+    this._dropzoneConfig = function(roomId, roomName) {
+      return {
+        url: "/upload",
+        maxFilesize: 20, // MB
+        accept: function(file, done) {
+          console.log("uploaded file", file);
+          if ( file ) {
+            var filepath = 'images/' + file.name;
+            var storageRef = firebase.storage().ref(filepath);
+            var task = storageRef.put(file);
+
+            task.on('state_changed',
+              function progress(snapshot){},
+              function error(err){},
+              function complete(snapshot){
+                self._chat.sendImage(roomId, task.snapshot.downloadURL, self._sendCallback.bind(self, {
+                  roomId: roomId,
+                  roomName: roomName,
+                  message: null
+                }));
+              }
+            );
+          }
+        }
+      };
+    };
 
     // Grab shortcuts to commonly used jQuery elements.
     this.$wrapper = $('#firechat');
@@ -155,15 +181,15 @@
       var self = this;
       var userId = message.userId;
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
-        if(message.image){
-          var storageRef = firebase.storage().ref(message.image);
-          storageRef.getDownloadURL().then(function(url) {
-            message.image = url;
-            self.showMessage(roomId, message);
-          });
-        }else{
+        // if(message.image){
+        //   var storageRef = firebase.storage().ref(message.image);
+        //   storageRef.getDownloadURL().then(function(url) {
+        //     message.image = url;
+        //     self.showMessage(roomId, message);
+        //   });
+        // }else{
           this.showMessage(roomId, message);
-        }
+        // }
       }
     },
     _onRemoveMessage: function(roomId, messageId) {
@@ -870,29 +896,33 @@
       }
     });
 
-     // Image Upload
-    var uploadImg = document.getElementById('uploadImg');
-    uploadImg.addEventListener('change', function(e){
-      var file = e.target.files[0];
-      if(file){
-        var filepath = 'images/'+file.name;
-        var storageRef = firebase.storage().ref(filepath);
-        var task = storageRef.put(file);
+    // Initialize Image Uploader
+    var myDropzone = new Dropzone("#uploader", self._dropzoneConfig(roomId, roomName));
+    // Dropzone.options.uploader = self._dropzoneConfig(roomId, roomName);
 
-        task.on('state_changed',
-          function progress(snapshot){},
-          function error(err){},
-          function complete(){
-            uploadImg.value = "";
-            self._chat.sendMessage(roomId, filepath, 'image', self._sendCallback.bind(self, {
-              roomId: roomId,
-              roomName: roomName,
-              message: null
-            }));
-          }
-        );
-      }
-    });
+     // Image Upload
+    // var uploadImg = document.getElementById('uploadImg');
+    // uploadImg.addEventListener('change', function(e){
+    //   var file = e.target.files[0];
+    //   if(file){
+    //     var filepath = 'images/'+file.name;
+    //     var storageRef = firebase.storage().ref(filepath);
+    //     var task = storageRef.put(file);
+
+    //     task.on('state_changed',
+    //       function progress(snapshot){},
+    //       function error(err){},
+    //       function complete(){
+    //         uploadImg.value = "";
+    //         self._chat.sendMessage(roomId, filepath, 'image', self._sendCallback.bind(self, {
+    //           roomId: roomId,
+    //           roomName: roomName,
+    //           message: null
+    //         }));
+    //       }
+    //     );
+    //   }
+    // });
 
 
     // Populate and render the tab menu template.
@@ -1148,6 +1178,11 @@
   Man2ManChatUI.prototype.doMarkAsRead = function(roomId) {
     var self= this;
     self._chat.markAsRead( roomId );
+  };
+
+  Man2ManChatUI.prototype.setDropzoneConfig = function(config) {
+    var self = this;
+    self._dropzoneConfig = config;
   };
 
 })(jQuery);
