@@ -50,6 +50,31 @@
     this._renderLayout();
 
     this._sendCallback = undefined;
+    this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
+      return {
+        url: "/upload",
+        maxFilesize: 20, // MB
+        accept: function(file, done) {
+          console.log("uploaded file", file);
+          if ( file ) {
+            var fileNamePrefix = new Date().getTime()+Math.random().toString(36).substring(2, 10);
+            var filepath = 'images/' + fileNamePrefix + "_" + file.name;
+            var storageRef = firebase.storage().ref(filepath);
+            var task = storageRef.put(file);
+
+            task.on('state_changed',
+              function progress(snapshot){},
+              function error(err){
+                alert('Something wrong with uploading. Please confirm the file less then 20MB.');
+              },
+              function complete(snapshot){
+                return uploadCallback( task.snapshot.downloadURL );
+              }
+            );
+          }
+        }
+      };
+    };
 
     // Grab shortcuts to commonly used jQuery elements.
     this.$wrapper = $('#firechat');
@@ -152,9 +177,18 @@
       }
     },
     _onNewMessage: function(roomId, message) {
+      var self = this;
       var userId = message.userId;
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
-        this.showMessage(roomId, message);
+        // if(message.image){
+        //   var storageRef = firebase.storage().ref(message.image);
+        //   storageRef.getDownloadURL().then(function(url) {
+        //     message.image = url;
+        //     self.showMessage(roomId, message);
+        //   });
+        // }else{
+          this.showMessage(roomId, message);
+        // }
       }
     },
     _onRemoveMessage: function(roomId, messageId) {
@@ -849,15 +883,52 @@
     $textarea.bind('keydown', function(e) {
       var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
       if ((e.which === 13) && (message !== '')) {
-        $textarea.val('');
-        self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
-          roomId: roomId,
-          roomName: roomName,
-          message: message
-        }));
-        return false;
+        if(!e.shiftKey){
+          $textarea.val('');
+          self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
+            roomId: roomId,
+            roomName: roomName,
+            message: message
+          }));
+          return false;
+        }
       }
     });
+
+    // Initialize Image Uploader
+    var myDropzone = new Dropzone("#uploader", self._dropzoneConfig(roomId, roomName, function( url ) {
+      self._chat.sendImage(roomId, url, self._sendCallback.bind(self, {
+        roomId: roomId,
+        roomName: roomName,
+        message: null
+      }));
+    }));
+    // Dropzone.options.uploader = self._dropzoneConfig(roomId, roomName);
+
+     // Image Upload
+    // var uploadImg = document.getElementById('uploadImg');
+    // uploadImg.addEventListener('change', function(e){
+    //   var file = e.target.files[0];
+    //   if(file){
+    //     var filepath = 'images/'+file.name;
+    //     var storageRef = firebase.storage().ref(filepath);
+    //     var task = storageRef.put(file);
+
+    //     task.on('state_changed',
+    //       function progress(snapshot){},
+    //       function error(err){},
+    //       function complete(){
+    //         uploadImg.value = "";
+    //         self._chat.sendMessage(roomId, filepath, 'image', self._sendCallback.bind(self, {
+    //           roomId: roomId,
+    //           roomName: roomName,
+    //           message: null
+    //         }));
+    //       }
+    //     );
+    //   }
+    // });
+
 
     // Populate and render the tab menu template.
     var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
@@ -1112,6 +1183,11 @@
   Man2ManChatUI.prototype.doMarkAsRead = function(roomId) {
     var self= this;
     self._chat.markAsRead( roomId );
+  };
+
+  Man2ManChatUI.prototype.setDropzoneConfig = function(config) {
+    var self = this;
+    self._dropzoneConfig = config;
   };
 
 })(jQuery);

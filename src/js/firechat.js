@@ -403,10 +403,15 @@
           userId: self._userId,
           name: self._userName,
           timestamp: firebase.database.ServerValue.TIMESTAMP,
-          message: messageContent,
           type: messageType || 'default'
         },
         newMessageRef;
+
+        if(messageType == 'image'){
+          message.image = messageContent;
+        }else{
+          message.message = messageContent;
+        }
 
     if (!self._user) {
       self._onAuthRequired();
@@ -418,6 +423,11 @@
 
     newMessageRef = self._messageRef.child(roomId).push();
     newMessageRef.setWithPriority(message, firebase.database.ServerValue.TIMESTAMP, cb);
+  };
+
+  Firechat.prototype.sendImage = function(roomId, imageUrl, cb) {
+    var self = this;
+    return self.sendMessage(roomId, imageUrl, 'image', cb);
   };
 
   Firechat.prototype.deleteMessage = function(roomId, messageId, cb) {
