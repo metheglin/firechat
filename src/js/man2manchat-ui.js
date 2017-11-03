@@ -967,8 +967,8 @@
 
     // Dynamically update the width of each tab based upon the number open.
     var tabs = this.$tabList.children('li');
-    var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
-    this.$tabList.children('li').css('width', tabWidth);
+    // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
+    // this.$tabList.children('li').css('width', tabWidth);
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');

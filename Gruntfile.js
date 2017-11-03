@@ -60,6 +60,12 @@ module.exports = function(grunt) {
           'src/js/man2manchat-ui.js'
         ],
         dest: 'dist/man2manchat.js'
+      },
+      css: {
+        src: [
+          'src/css/chat.css',
+        ],
+        dest: 'dist/man2manchat.css'
       }
     },
 

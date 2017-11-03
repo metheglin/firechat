@@ -88,35 +88,31 @@ body {
     color: #FEF8F8;
     border-radius: 20px;
 }
-#contact-list {
+.contact-list {
     height: 500px;
     overflow-y: scroll;
 }
-#contact-list li {
+.contact-list li {
     cursor: pointer;
-    border-color: #B79F99;
+    border: 1px solid #B79F99;
     border-right: none;
     position: relative;
     overflow: hidden;
+    padding: 10px 15px;
 }
-#contact-list li:hover,
-#contact-list li.selected {
+.contact-list li a {
+    outline: none;
+    color: #333;
+}
+.contact-list li:hover,
+.contact-list li.active {
     background: #F4E6DD;
 }
-#contact-list .list-group {
-    border-radius: 0px;
-}
-#contact-list .list-group-item {
-    background: inherit;
-}
-#contact-list .list-group-item {
-    border-radius: 0px;
-}
-#contact-list .list-group-item span {
+.contact-list li a span {
     display: block;
     margin-top: 10px;
 }
-#contact-list .list-group-item .chat_notification {
+.contact-list li a .chat_notification {
     font-size: 12px;
     width: 25px;
     height: 25px;
@@ -125,7 +121,7 @@ body {
     margin-top: -10px;
     text-align: center;
 }
-#contact-list li .row_corner {
+.contact-list li a .row_corner {
     background: #B79F99;
     color: #F3F1EE;
     font-size: 8px;
