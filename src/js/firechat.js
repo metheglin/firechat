@@ -248,12 +248,13 @@
   // --------------
 
   // Initialize the library and setup data listeners.
-  Firechat.prototype.setUser = function(userId, userName, callback) {
+  Firechat.prototype.setUser = function(userId, userName, userAvatar, callback) {
     var self = this;
 
     self._firebaseApp.auth().onAuthStateChanged(function(user) {
       if (user) {
         self._userId = userId.toString();
+        self._avatar = userAvatar.toString();
         self._userName = userName.toString();
         self._userRef = self._firechatRef.child('users').child(self._userId);
         self._sessionRef = self._userRef.child('sessions').push();

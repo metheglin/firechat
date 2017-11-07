@@ -267,11 +267,11 @@
    * This method assumes that the underlying Firebase reference has
    * already been authenticated.
    */
-  Man2ManChatUI.prototype.setUser = function(userId, userName, callback) {
+  Man2ManChatUI.prototype.setUser = function(userId, userName, userAvatar, callback) {
     var self = this;
 
     // Initialize data events
-    self._chat.setUser(userId, userName, function(user) {
+    self._chat.setUser(userId, userName, userAvatar, function(user) {
       self._user = user;
 
       if (self._chat.userIsModerator()) {
