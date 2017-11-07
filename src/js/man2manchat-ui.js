@@ -267,11 +267,11 @@
    * This method assumes that the underlying Firebase reference has
    * already been authenticated.
    */
-  Man2ManChatUI.prototype.setUser = function(userId, userName, callback) {
+  Man2ManChatUI.prototype.setUser = function(userId, userName, userAvatar, callback) {
     var self = this;
 
     // Initialize data events
-    self._chat.setUser(userId, userName, function(user) {
+    self._chat.setUser(userId, userName, userAvatar, function(user) {
       self._user = user;
 
       if (self._chat.userIsModerator()) {
@@ -967,8 +967,8 @@
 
     // Dynamically update the width of each tab based upon the number open.
     var tabs = this.$tabList.children('li');
-    var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
-    this.$tabList.children('li').css('width', tabWidth);
+    // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
+    // this.$tabList.children('li').css('width', tabWidth);
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');

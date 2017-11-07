@@ -1,22 +1,14 @@
-<div class='message message-<%- type %> <% if (isSelfMessage) { %> message-self <% } %>' data-message-id='<%- id %>' data-user-id='<%- userId %>' data-user-name='<%- name %>' data-class="firechat-message">
-  <div class='clearfix'>
-    <label class='fourfifth'>
-      <strong class='name' title='<%- name %>'><%- name %></strong>
-      <em>(<%- localtime %>)</em>:
-    </label>
-
-    <% if (!disableActions) { %>
-    <label class='fifth alignright'>
-      <a href='#!' data-event='firechat-user-chat' class='icon user-chat' title='Invite to Private Chat'>&nbsp;</a>
-      <a href='#!' data-event='firechat-user-mute-toggle' class='icon user-mute' title='Mute User'>&nbsp;</a>
-    </label>
-    <% } %>
-
+<li class="<% if (isSelfMessage) { %>right <% }else { %>left <% } %> clearfix">
+  <span class="chat-img col-xs-12 col-sm-2">
+      <img src="http://api.randomuser.me/portraits/men/56.jpg" alt="<%- name %>" class="img-responsive img-circle" />
+  </span>
+  <div class="chat-body clearfix col-sm-7">
+      <p>
+          <% if (image) { %>
+            <img src="<%= image %>" style="width:50%" />
+          <% } %>
+          <%= message %>
+      </p>
+      <small><%- localtime %></small>
   </div>
-  <div class='clearfix message-content'>
-    <% if (image) { %>
-      <div class="message-image-wrapper"><img src="<%= image %>" style="width:50%" /></div>
-    <% } %>
-    <%= message %>
-  </div>
-</div>
+</li>
