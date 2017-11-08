@@ -34,7 +34,8 @@ module.exports = function(grunt) {
     less: {
       development: {
         files: {
-          "dist/firechat.css": "src/less/styles.less"
+          "dist/firechat.css": "src/less/styles.less",
+          "dist/man2manchat.css": "src/less/chat.less"
         }
       },
       production: {
@@ -42,7 +43,8 @@ module.exports = function(grunt) {
           yuicompress: true
         },
         files: {
-          "dist/firechat.min.css": "src/less/styles.less"
+          "dist/firechat.min.css": "src/less/styles.less",
+          "dist/man2manchat.css": "src/less/chat.less"
         }
       }
     },
@@ -60,12 +62,6 @@ module.exports = function(grunt) {
           'src/js/man2manchat-ui.js'
         ],
         dest: 'dist/man2manchat.js'
-      },
-      css: {
-        src: [
-          'src/css/chat.css',
-        ],
-        dest: 'dist/man2manchat.css'
       }
     },
 
