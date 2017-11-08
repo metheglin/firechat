@@ -4,6 +4,7 @@
 @solid_border_color: #B79F99;
 @light_color: #a58d86;
 @highlight_color: #F4E6DD;
+@accent_color: #FB878A;
 
 body {
     background: @bg_color;
@@ -52,7 +53,7 @@ body {
 }
 #chat_left {
     border-right: 1px solid @solid_border_color;
-    
+    padding: 0;
 }
 #chat_left .chat-group {
     margin: 0 0 10px 0;
@@ -91,7 +92,7 @@ body {
     line-height: 20px;
 }
 .chat_notification {
-    background: #FB878A;
+    background: @accent_color;
     color: #FEF8F8;
     border-radius: 20px;
 }
@@ -103,9 +104,13 @@ body {
     cursor: pointer;
     border: 1px solid @solid_border_color;
     border-right: none;
+    border-bottom: 0;
     position: relative;
     overflow: hidden;
     padding: 10px 15px;
+}
+.contact-list li:last-child {
+    border-bottom: 1px solid @solid_border_color;
 }
 .contact-list li a {
     outline: none;
@@ -121,12 +126,13 @@ body {
 }
 .contact-list li a .chat_notification {
     font-size: 12px;
-    width: 25px;
+    /*width: 25px;*/
     height: 25px;
     line-height: 25px;
     float: right;
-    margin-top: -10px;
+    margin-top: -18px;
     text-align: center;
+    padding: 0 8px;
 }
 .contact-list li a .row_corner {
     background: @solid_border_color;
@@ -199,5 +205,8 @@ body {
 }
 
 .dz-preview {
+    display: none;
+}
+.row_corner {
     display: none;
 }
