@@ -507,12 +507,6 @@
     });
   };
 
-  Man2ManChatUI.prototype._checkUnreadRoomForUser = function(roomID, cb) {
-    this._chat.getUnreadRoomList(function(rooms) {
-      cb(roomID in rooms);
-    });
-  };
-
   Man2ManChatUI.prototype.selectUserRoom = function(roomId, roomName) {
     var self = this;
     if (self.$messages[roomId]) {
@@ -957,7 +951,7 @@
     $tab.bind('shown', function(event) {
       $messages.scrollTop($messages[0].scrollHeight);
       
-      $tab.on("click", function(){
+      $btnMarkRead.on("click", function(){
         console.log("marked as READ:", roomId);
         self.doMarkAsRead( roomId );
       });
@@ -990,13 +984,6 @@
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');
-    this._checkUnreadRoomForUser(roomId, function(response){
-      if(response){
-        tabs.find('a[href="#' + roomId + '"]').find('.chat_notification').removeClass('hide').addClass('show');
-      }else{
-        tabs.find('a[href="#' + roomId + '"]').find('.chat_notification').removeClass('show').addClass('hide');
-      }
-    });
 
     // Sort each item in the user list alphabetically on click of the dropdown.
     $('#firechat-btn-room-user-list-' + roomId).bind('click', function() {
