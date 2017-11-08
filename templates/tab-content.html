@@ -4,11 +4,15 @@
     id='firechat-messages<%- id %>' 
     class='chat'></ul>
 
+  <button class="btn btn-sm btn-warning" 
+    id="btn-mark-read-<%- id %>">
+    <span class="icon check"></span>
+    既読にする
+  </button>
+
   <div class="panel-message">
     <div class="message_top">
       <label>
-        <!-- <i class=""></i>
-        <input class="file_upload" type="file" accept="image/*" id="uploader" /> -->
         <form
           class="dropzone fa fa-picture-o fa-lg"
           id="uploader">
