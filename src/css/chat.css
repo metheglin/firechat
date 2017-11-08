@@ -157,7 +157,7 @@ body {
     padding: 0 3px;
     border: none;
 }
-.panel-message label {
+.panel-message #uploader {
     margin: 0;
     color: #C9B7B2;
     cursor: pointer;
@@ -167,6 +167,10 @@ body {
 }
 .panel-message textarea {
     border: none;
+}
+#firechat-tab-content .instruction {
+    color: #C9B7B2;
+    text-align: right;
 }
 
 
@@ -185,4 +189,8 @@ body {
     line-height: 20px;
     font-size: 12px;
     margin: 0 0 2px 0;
+}
+
+.dz-preview {
+    display: none;
 }

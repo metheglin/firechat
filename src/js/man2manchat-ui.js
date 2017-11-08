@@ -54,6 +54,7 @@
       return {
         url: "/upload",
         maxFilesize: 20, // MB
+        clickable: "#uploader",
         accept: function(file, done) {
           console.log("uploaded file", file);
           if ( file ) {
@@ -908,7 +909,7 @@
     });
 
     // Initialize Image Uploader
-    var myDropzone = new Dropzone("#uploader", self._dropzoneConfig(roomId, roomName, function( url ) {
+    var myDropzone = new Dropzone("#panel-message", self._dropzoneConfig(roomId, roomName, function( url ) {
       self._chat.sendImage(roomId, url, self._sendCallback.bind(self, {
         roomId: roomId,
         roomName: roomName,

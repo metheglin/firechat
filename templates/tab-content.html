@@ -3,14 +3,15 @@
     id='firechat-messages<%- id %>' 
     class='chat'></ul>
 
-  <div class="panel-message">
+  <div class="panel-message" id="panel-message">
     <div class="message_top">
-      <label>
+      <a class="fa fa-picture-o fa-lg" id="uploader"></a>
+      <!-- <label>
         <form
           class="dropzone fa fa-picture-o fa-lg"
           id="uploader">
         </form>
-      </label>
+      </label> -->
       <button
         id="btn-mark-read-<%- id %>">
         既読にする
@@ -18,7 +19,7 @@
     </div>
     <textarea class="form-control input-sm" id="textarea<%- id %>" cols="100" rows="5"></textarea>
   </div>
-  <small>[Shift + Enter]で改行できます</small>
+  <p class="instruction"><small>[Shift + Enter]で改行できます</small></p>
 
 
 </div>
