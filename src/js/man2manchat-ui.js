@@ -49,6 +49,7 @@
 
     this._renderLayout();
 
+    this._defaultAvatar = 'http://api.randomuser.me/portraits/men/56.jpg';
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
@@ -167,7 +168,7 @@
     },
 
     _onEnterRoom: function(room) {
-      this.attachTab(room.id, room.name);
+      this.attachTab(room.id, room.name, room.avatar);
     },
     _onLeaveRoom: function(roomId) {
       this.removeTab(roomId);
@@ -454,6 +455,7 @@
           var room = rooms[roomId];
           if (room.type != "public") continue;
           room.isRoomOpen = !!self.$messages[room.id];
+          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
           var $roomItem = $(template(room));
           $roomItem.children('a').bind('click', selectRoomListItem);
           self.$roomList.append($roomItem.toggle(true));
@@ -499,6 +501,7 @@
           room.type = "public";
           room.name = room.name ? room.name : "不明のチャット";
           room.isRoomOpen = false;
+          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
           if (room.type != "public") continue;
           var $roomItem = $(template(room));
           $roomItem.children('a').bind('click', selectRoomListItem);
@@ -867,7 +870,7 @@
    * @param    {string}    roomId
    * @param    {string}    roomName
    */
-  Man2ManChatUI.prototype.attachTab = function(roomId, roomName) {
+  Man2ManChatUI.prototype.attachTab = function(roomId, roomName, roomAvatar) {
     var self = this;
 
     // If this tab already exists, give it focus.
@@ -878,7 +881,8 @@
 
     var room = {
       id: roomId,
-      name: roomName
+      name: roomName,
+      avatar: roomAvatar ? roomAvatar : self._defaultAvatar
     };
 
     // Populate and render the tab content template.
@@ -1049,6 +1053,7 @@
     var message = {
       id              : rawMessage.id,
       localtime       : self.formatTime(rawMessage.timestamp),
+      avatar          : rawMessage.avatar || self._defaultAvatar,
       message         : rawMessage.message || '',
       image           : rawMessage.image || null,
       userId          : rawMessage.userId,
