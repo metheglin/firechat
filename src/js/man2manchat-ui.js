@@ -422,6 +422,12 @@
     var self = this;
 
     $('#firechat-btn-rooms').bind('click', function() {
+      $(this).parents('.chat-group').find('button').removeClass('active');
+      $(this).addClass('active');
+      $('#firechat-unread-room-list').hide();
+      $('#firechat-tab-list').show();
+      $('.chat_search_box').css("visibility", 'inherit');
+
       if ($(this).parent().hasClass('open')) {
         return;
       }
@@ -459,6 +465,12 @@
     var self = this;
 
     $('#firechat-btn-unread-rooms').bind('click', function() {
+      $(this).parents('.chat-group').find('button').removeClass('active');
+      $(this).addClass('active');
+      $('#firechat-unread-room-list').show();
+      $('#firechat-tab-list').hide();
+      $('.chat_search_box').css("visibility", 'hidden');
+
       if ($(this).parent().hasClass('open')) {
         return;
       }

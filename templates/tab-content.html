@@ -1,5 +1,4 @@
 <div id='<%- id %>' data-room-id='<%- id %>' class='tab-pane'>
-
   <ul 
     id='firechat-messages<%- id %>' 
     class='chat'></ul>
@@ -7,17 +6,19 @@
   <div class="panel-message">
     <div class="message_top">
       <label>
-        <!-- <i class=""></i>
-        <input class="file_upload" type="file" accept="image/*" id="uploader" /> -->
         <form
           class="dropzone fa fa-picture-o fa-lg"
           id="uploader">
         </form>
       </label>
-      <span>テキスト</span>
+      <button
+        id="btn-mark-read-<%- id %>">
+        テキスト
+      </button>
     </div>
     <textarea class="form-control input-sm" id="textarea<%- id %>" cols="100" rows="5"></textarea>
   </div>
+  <small>You can make a new line with [Shift + Enter]</small>
 
 
 </div>
