@@ -754,11 +754,38 @@
           }
 
           $active.removeClass('in');
+      },
+      showDetail = function($el){
+        var $this = $el,
+            $imgAvatar = $("#chat_right").find(".roommeta-avatar"),
+            $ulTable = $("#chat_right").find(".roommeta-table");
+        var roomMeta = Object.keys($this.parent().data()).reduce(function(acc,key){
+          if ( key.match(/^roommeta/) ) {
+            var shortkey = key.replace("roommeta", "");
+            if ( shortkey !== "Avatar" ) {
+              acc[shortkey] = $this.parent().data()[key];
+            }
+          }
+          return acc;
+        }, {});
+
+        console.log("showDetail",roomMeta);
+
+        $imgAvatar.attr("src", roomMeta.Avatar ? roomMeta.Avatar : self._defaultAvatar);
+        var html = Object.keys(roomMeta).reduce(function(acc,key){
+          if (!roomMeta[key]) return "";
+          return acc + '<li>' +
+            '<span class="col-sm-3">' + key + '</span>' +
+            '<strong>' + roomMeta[key] + '</strong>' +
+            '</li>';
+        }, "");
+        $ulTable.html(html);
       };
 
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
+      showDetail($(this));
     });
   };
 
