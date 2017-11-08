@@ -1208,4 +1208,9 @@
     self._dropzoneConfig = config;
   };
 
+  Man2ManChatUI.prototype.setDefaultAvatar = function(avatar) {
+    var self = this;
+    self._defaultAvatar = avatar;
+  };
+
 })(jQuery);
