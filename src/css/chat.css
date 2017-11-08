@@ -13,7 +13,7 @@ body {
 }
 .chat {
     list-style: none;
-    margin: 0;
+    margin: 20px 0 0 0;
     padding: 0;
     height: 450px;
     overflow-y: scroll;

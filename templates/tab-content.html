@@ -1,14 +1,13 @@
 <div id='<%- id %>' data-room-id='<%- id %>' class='tab-pane'>
-
+  <button class="btn btn-sm btn-warning pull-right" 
+    id="btn-mark-read-<%- id %>">
+    <span class="icon check"></span>
+    テキスト
+  </button>
+  <div class="clearfix"></div>
   <ul 
     id='firechat-messages<%- id %>' 
     class='chat'></ul>
-
-  <button class="btn btn-sm btn-warning" 
-    id="btn-mark-read-<%- id %>">
-    <span class="icon check"></span>
-    既読にする
-  </button>
 
   <div class="panel-message">
     <div class="message_top">
@@ -22,6 +21,7 @@
     </div>
     <textarea class="form-control input-sm" id="textarea<%- id %>" cols="100" rows="5"></textarea>
   </div>
+  <small>You can make a new line with [Shift + Enter]</small>
 
 
 </div>
