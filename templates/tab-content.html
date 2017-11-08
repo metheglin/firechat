@@ -1,10 +1,4 @@
 <div id='<%- id %>' data-room-id='<%- id %>' class='tab-pane'>
-  <button class="btn btn-sm btn-warning pull-right" 
-    id="btn-mark-read-<%- id %>">
-    <span class="icon check"></span>
-    テキスト
-  </button>
-  <div class="clearfix"></div>
   <ul 
     id='firechat-messages<%- id %>' 
     class='chat'></ul>
@@ -17,7 +11,10 @@
           id="uploader">
         </form>
       </label>
-      <span>テキスト</span>
+      <button
+        id="btn-mark-read-<%- id %>">
+        テキスト
+      </button>
     </div>
     <textarea class="form-control input-sm" id="textarea<%- id %>" cols="100" rows="5"></textarea>
   </div>

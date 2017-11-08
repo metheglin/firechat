@@ -13,7 +13,7 @@ body {
 }
 .chat {
     list-style: none;
-    margin: 20px 0 0 0;
+    margin: 0;
     padding: 0;
     height: 450px;
     overflow-y: scroll;
@@ -147,7 +147,7 @@ body {
     border-bottom: 1px solid #E1E1E1;
     padding: 6px 8px;
 }
-.panel-message .message_top span {
+.panel-message .message_top button {
     background: #6B5034;
     color: #E1E1E1;
     border-radius: 3px;
@@ -155,6 +155,7 @@ body {
     line-height: 15px;
     float: right;
     padding: 0 3px;
+    border: none;
 }
 .panel-message label {
     margin: 0;
