@@ -925,7 +925,7 @@
     // Attach on-enter event to textarea.
     var $textarea = $tabContent.find('textarea').first();
     $textarea.bind('keydown', function(e) {
-      self._chat.typingSignal(roomId, roomName);
+      self._chat.typingSignal(roomId);
       var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
       if ((e.which === 13) && (message !== '')) {
         if(!e.shiftKey){

@@ -686,10 +686,10 @@
     this._staffUnreadRoomsRef.child(roomId).remove();
   };
 
-  Firechat.prototype.typingSignal = function(roomId, roomName) {
+  Firechat.prototype.typingSignal = function(roomId) {
     var signal = this._typingSignal.child(roomId).push({
       id: this._userId,
-      name: roomName
+      name: this._userName
     });
     this._typingSignal.child(roomId).child(signal.key).remove();
   };
