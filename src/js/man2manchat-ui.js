@@ -925,6 +925,7 @@
     // Attach on-enter event to textarea.
     var $textarea = $tabContent.find('textarea').first();
     $textarea.bind('keydown', function(e) {
+      self._chat.typingSignal(roomId, roomName);
       var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
       if ((e.which === 13) && (message !== '')) {
         if(!e.shiftKey){
@@ -1013,6 +1014,13 @@
     var tabs = this.$tabList.children('li');
     // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
     // this.$tabList.children('li').css('width', tabWidth);
+    self._chat.getTypingSignal(roomId, function(id, data){
+      $("#typingSignal").html("");
+      $("#typingSignal").append("<small id='"+id+"'>"+data.name+" is Typing... </small>");
+      setTimeout(function(){
+        $("#typingSignal").find('#'+id).remove();
+      }, 1000);
+    });
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');
