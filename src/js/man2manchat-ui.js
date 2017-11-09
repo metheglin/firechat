@@ -49,11 +49,13 @@
 
     this._renderLayout();
 
+    this._defaultAvatar = 'http://api.randomuser.me/portraits/men/56.jpg';
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
         url: "/upload",
         maxFilesize: 20, // MB
+        clickable: "#uploader",
         accept: function(file, done) {
           console.log("uploaded file", file);
           if ( file ) {
@@ -166,7 +168,7 @@
     },
 
     _onEnterRoom: function(room) {
-      this.attachTab(room.id, room.name);
+      this.attachTab(room.id, room.name, room.avatar);
     },
     _onLeaveRoom: function(roomId) {
       this.removeTab(roomId);
@@ -422,6 +424,12 @@
     var self = this;
 
     $('#firechat-btn-rooms').bind('click', function() {
+      $(this).parents('.chat-group').find('button').removeClass('active');
+      $(this).addClass('active');
+      $('#firechat-unread-room-list').hide();
+      $('#firechat-tab-list').show();
+      $('.chat_search_box').css("visibility", 'inherit');
+
       if ($(this).parent().hasClass('open')) {
         return;
       }
@@ -447,6 +455,7 @@
           var room = rooms[roomId];
           if (room.type != "public") continue;
           room.isRoomOpen = !!self.$messages[room.id];
+          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
           var $roomItem = $(template(room));
           $roomItem.children('a').bind('click', selectRoomListItem);
           self.$roomList.append($roomItem.toggle(true));
@@ -459,6 +468,12 @@
     var self = this;
 
     $('#firechat-btn-unread-rooms').bind('click', function() {
+      $(this).parents('.chat-group').find('button').removeClass('active');
+      $(this).addClass('active');
+      $('#firechat-unread-room-list').show();
+      $('#firechat-tab-list').hide();
+      $('.chat_search_box').css("visibility", 'hidden');
+
       if ($(this).parent().hasClass('open')) {
         return;
       }
@@ -486,6 +501,7 @@
           room.type = "public";
           room.name = room.name ? room.name : "不明のチャット";
           room.isRoomOpen = false;
+          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
           if (room.type != "public") continue;
           var $roomItem = $(template(room));
           $roomItem.children('a').bind('click', selectRoomListItem);
@@ -738,11 +754,38 @@
           }
 
           $active.removeClass('in');
+      },
+      showDetail = function($el){
+        var $this = $el,
+            $imgAvatar = $("#chat_right").find(".roommeta-avatar"),
+            $ulTable = $("#chat_right").find(".roommeta-table");
+        var roomMeta = Object.keys($this.parent().data()).reduce(function(acc,key){
+          if ( key.match(/^roommeta/) ) {
+            var shortkey = key.replace("roommeta", "");
+            if ( shortkey !== "Avatar" ) {
+              acc[shortkey] = $this.parent().data()[key];
+            }
+          }
+          return acc;
+        }, {});
+
+        console.log("showDetail",roomMeta);
+
+        $imgAvatar.attr("src", roomMeta.Avatar ? roomMeta.Avatar : self._defaultAvatar);
+        var html = Object.keys(roomMeta).reduce(function(acc,key){
+          if (!roomMeta[key]) return "";
+          return acc + '<li>' +
+            '<span class="col-sm-3">' + key + '</span>' +
+            '<strong>' + roomMeta[key] + '</strong>' +
+            '</li>';
+        }, "");
+        $ulTable.html(html);
       };
 
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
+      showDetail($(this));
     });
   };
 
@@ -854,7 +897,7 @@
    * @param    {string}    roomId
    * @param    {string}    roomName
    */
-  Man2ManChatUI.prototype.attachTab = function(roomId, roomName) {
+  Man2ManChatUI.prototype.attachTab = function(roomId, roomName, roomAvatar) {
     var self = this;
 
     // If this tab already exists, give it focus.
@@ -865,7 +908,8 @@
 
     var room = {
       id: roomId,
-      name: roomName
+      name: roomName,
+      avatar: roomAvatar ? roomAvatar : self._defaultAvatar
     };
 
     // Populate and render the tab content template.
@@ -896,7 +940,7 @@
     });
 
     // Initialize Image Uploader
-    var myDropzone = new Dropzone("#uploader", self._dropzoneConfig(roomId, roomName, function( url ) {
+    var myDropzone = new Dropzone("#panel-message", self._dropzoneConfig(roomId, roomName, function( url ) {
       self._chat.sendImage(roomId, url, self._sendCallback.bind(self, {
         roomId: roomId,
         roomName: roomName,
@@ -1036,6 +1080,7 @@
     var message = {
       id              : rawMessage.id,
       localtime       : self.formatTime(rawMessage.timestamp),
+      avatar          : rawMessage.avatar || self._defaultAvatar,
       message         : rawMessage.message || '',
       image           : rawMessage.image || null,
       userId          : rawMessage.userId,
@@ -1188,6 +1233,11 @@
   Man2ManChatUI.prototype.setDropzoneConfig = function(config) {
     var self = this;
     self._dropzoneConfig = config;
+  };
+
+  Man2ManChatUI.prototype.setDefaultAvatar = function(avatar) {
+    var self = this;
+    self._defaultAvatar = avatar;
   };
 
 })(jQuery);

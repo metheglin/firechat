@@ -1,5 +1,13 @@
+
+@bg_color: #fff6f0;
+@default_color: #6B5034;
+@solid_border_color: #B79F99;
+@light_color: #a58d86;
+@highlight_color: #F4E6DD;
+@accent_color: #FB878A;
+
 body {
-    background: #FEF7F1;
+    background: @bg_color;
 }
 ::-webkit-scrollbar-track {
     background-color: inherit;
@@ -38,14 +46,14 @@ body {
     font-size: 12px;
 }
 .chat li .chat-body small {
-    color: #D6C4BE;
+    color: @light_color;
     font-size: 10px;
     line-height: 20px;
     float: right;
 }
 #chat_left {
-    border-right: 1px solid #B79F99;
-    padding: 0px;
+    border-right: 1px solid @solid_border_color;
+    padding: 0;
 }
 #chat_left .chat-group {
     margin: 0 0 10px 0;
@@ -60,9 +68,9 @@ body {
 .chat-group button {
     position: relative;
     background: #FFFFFF;
-    border-color: #745A40;
+    border-color: @default_color;
     width: 80%;
-    color: #6B5034;
+    color: @default_color;
     border-radius: 5px;
 }
 .chat-group .col-sm-4 {
@@ -71,7 +79,7 @@ body {
 .chat-group button:hover,
 .chat-group button.active:hover,
 .chat-group button.active {
-    background: #6B5034;
+    background: @default_color;
     color: #F3F1EE;
 }
 .chat-group button .chat_notification {
@@ -84,7 +92,7 @@ body {
     line-height: 20px;
 }
 .chat_notification {
-    background: #FB878A;
+    background: @accent_color;
     color: #FEF8F8;
     border-radius: 20px;
 }
@@ -94,11 +102,15 @@ body {
 }
 .contact-list li {
     cursor: pointer;
-    border: 1px solid #B79F99;
+    border: 1px solid @solid_border_color;
     border-right: none;
+    border-bottom: 0;
     position: relative;
     overflow: hidden;
     padding: 10px 15px;
+}
+.contact-list li:last-child {
+    border-bottom: 1px solid @solid_border_color;
 }
 .contact-list li a {
     outline: none;
@@ -106,7 +118,7 @@ body {
 }
 .contact-list li:hover,
 .contact-list li.active {
-    background: #F4E6DD;
+    background: @highlight_color;
 }
 .contact-list li a span {
     display: block;
@@ -114,15 +126,16 @@ body {
 }
 .contact-list li a .chat_notification {
     font-size: 12px;
-    width: 25px;
+    /*width: 25px;*/
     height: 25px;
     line-height: 25px;
     float: right;
-    margin-top: -10px;
+    margin-top: -18px;
     text-align: center;
+    padding: 0 8px;
 }
 .contact-list li a .row_corner {
-    background: #B79F99;
+    background: @solid_border_color;
     color: #F3F1EE;
     font-size: 8px;
     position: absolute;
@@ -136,7 +149,7 @@ body {
     text-align: center;
 }
 #chat_middle {
-    border-right: 1px solid #B79F99;
+    border-right: 1px solid @solid_border_color;
 }
 .panel-message {
     display: block;
@@ -147,18 +160,19 @@ body {
     border-bottom: 1px solid #E1E1E1;
     padding: 6px 8px;
 }
-.panel-message .message_top span {
-    background: #6B5034;
+.panel-message .message_top button {
+    background: @default_color;
     color: #E1E1E1;
     border-radius: 3px;
-    font-size: 8px;
+    font-size: 83%;
     line-height: 15px;
     float: right;
-    padding: 0 3px;
+    padding: 3px 6px;
+    border: none;
 }
-.panel-message label {
+.panel-message #uploader {
     margin: 0;
-    color: #C9B7B2;
+    color: @light_color;
     cursor: pointer;
 }
 .panel-message .file_upload {
@@ -166,6 +180,10 @@ body {
 }
 .panel-message textarea {
     border: none;
+}
+#firechat-tab-content .instruction {
+    color: @light_color;
+    text-align: right;
 }
 
 
@@ -184,4 +202,11 @@ body {
     line-height: 20px;
     font-size: 12px;
     margin: 0 0 2px 0;
+}
+
+.dz-preview {
+    display: none;
+}
+.row_corner {
+    display: none;
 }
