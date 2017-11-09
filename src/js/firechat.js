@@ -52,6 +52,7 @@
     this._suspensionsRef = this._firechatRef.child('suspensions');
     this._usersOnlineRef = this._firechatRef.child('user-names-online');
     this._staffUnreadRoomsRef = this._firechatRef.child('staff-unread-rooms');
+    this._typingSignal = this._firechatRef.child('room-typing-signal');
 
     // Setup and establish default options.
     this._options = options || {};
@@ -683,5 +684,25 @@
 
   Firechat.prototype.markAsRead = function( roomId ) {
     this._staffUnreadRoomsRef.child(roomId).remove();
+  };
+
+  Firechat.prototype.typingSignal = function(roomId, roomName) {
+    var signal = this._typingSignal.child(roomId).push({
+      id: this._userId,
+      name: roomName
+    });
+    this._typingSignal.child(roomId).child(signal.key).remove();
+  };
+
+  Firechat.prototype.getTypingSignal = function(roomId, cb) {
+    var self = this;
+    this._typingSignal.child(roomId).on('value', function(snapshot) {
+      snapshot.forEach(function(childSnapshot) {
+        if (childSnapshot.val().id != self._userId) {
+          cb(childSnapshot.key, childSnapshot.val());
+        }
+      });
+
+    });
   };
 })();
