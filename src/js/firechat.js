@@ -411,6 +411,8 @@
 
         if(messageType == 'image'){
           message.image = messageContent;
+        }else if(messageType == 'file'){
+          message.file = messageContent;
         }else{
           message.message = messageContent;
         }
@@ -427,9 +429,9 @@
     newMessageRef.setWithPriority(message, firebase.database.ServerValue.TIMESTAMP, cb);
   };
 
-  Firechat.prototype.sendImage = function(roomId, imageUrl, cb) {
+  Firechat.prototype.sendAttachment = function(roomId, attachmentUrl, attachmentType, cb) {
     var self = this;
-    return self.sendMessage(roomId, imageUrl, 'image', cb);
+    return self.sendMessage(roomId, attachmentUrl, attachmentType, cb);
   };
 
   Firechat.prototype.deleteMessage = function(roomId, messageId, cb) {

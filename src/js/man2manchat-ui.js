@@ -942,7 +942,11 @@
 
     // Initialize Image Uploader
     var myDropzone = new Dropzone("#panel-message", self._dropzoneConfig(roomId, roomName, function( url ) {
-      self._chat.sendImage(roomId, url, self._sendCallback.bind(self, {
+      var imageExtensions = ["gif","jpeg","jpg","png","tif","tiff","bmp"];
+      var attachmentExtension = url.split('?').shift().split('.').pop();
+      var attachmentType = (imageExtensions.indexOf(attachmentExtension) > -1) ? "image" : "file";
+
+      self._chat.sendAttachment(roomId, url, attachmentType, self._sendCallback.bind(self, {
         roomId: roomId,
         roomName: roomName,
         message: null
@@ -1091,6 +1095,7 @@
       avatar          : rawMessage.avatar || self._defaultAvatar,
       message         : rawMessage.message || '',
       image           : rawMessage.image || null,
+      file            : rawMessage.file  || null,
       userId          : rawMessage.userId,
       name            : rawMessage.name,
       type            : rawMessage.type || 'default',
