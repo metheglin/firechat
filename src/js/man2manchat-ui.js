@@ -99,6 +99,8 @@
 
     // Setup bindings to internal methods
     this._bindDataEvents();
+
+    this.selectUnreadRoom();
   }
 
   // Run Man2ManChatUI in *noConflict* mode, returning the `Man2ManChatUI` variable to
@@ -467,47 +469,52 @@
   Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
     var self = this;
 
-    $('#firechat-btn-unread-rooms').bind('click', function() {
-      $(this).parents('.chat-group').find('button').removeClass('active');
-      $(this).addClass('active');
-      $('#firechat-unread-room-list').show();
-      $('#firechat-tab-list').hide();
-      $('.chat_search_box').css("visibility", 'hidden');
+    $('#firechat-btn-unread-rooms').bind('click', self.selectUnreadRoom.bind(self));
+  };
 
-      if ($(this).parent().hasClass('open')) {
-        return;
+  Man2ManChatUI.prototype.selectUnreadRoom = function() {
+    var self = this;
+
+    $(this).parents('.chat-group').find('button').removeClass('active');
+    $(this).addClass('active');
+    $('#firechat-unread-room-list').show();
+    $('#firechat-tab-list').hide();
+    $('.chat_search_box').css("visibility", 'hidden');
+
+    if ($(this).parent().hasClass('open')) {
+      return;
+    }
+
+    var $this = $(this),
+        template = FirechatDefaultTemplates["templates/room-list-item.html"],
+        selectRoomListItem = function() {
+          var parent = $(this).parent(),
+              roomId = parent.data('room-id'),
+              roomName = parent.data('room-name');
+
+          if (self.$messages[roomId]) {
+            self.focusTab(roomId);
+          } else {
+            self._chat.enterRoom(roomId, roomName);
+          }
+          return false;
+        };
+
+    self._chat.getUnreadRoomList(function(rooms) {
+      self.$unreadRoomList.empty();
+      for (var roomId in rooms) {
+        var room = rooms[roomId];
+        room.id   = roomId;
+        room.type = "public";
+        room.name = room.name ? room.name : "不明のチャット";
+        room.isRoomOpen = false;
+        room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
+        if (room.type != "public") continue;
+        var $roomItem = $(template(room));
+        $roomItem.children('a').bind('click', selectRoomListItem);
+        self.$unreadRoomList.append($roomItem.toggle(true));
       }
-
-      var $this = $(this),
-          template = FirechatDefaultTemplates["templates/room-list-item.html"],
-          selectRoomListItem = function() {
-            var parent = $(this).parent(),
-                roomId = parent.data('room-id'),
-                roomName = parent.data('room-name');
-
-            if (self.$messages[roomId]) {
-              self.focusTab(roomId);
-            } else {
-              self._chat.enterRoom(roomId, roomName);
-            }
-            return false;
-          };
-
-      self._chat.getUnreadRoomList(function(rooms) {
-        self.$unreadRoomList.empty();
-        for (var roomId in rooms) {
-          var room = rooms[roomId];
-          room.id   = roomId;
-          room.type = "public";
-          room.name = room.name ? room.name : "不明のチャット";
-          room.isRoomOpen = false;
-          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
-          if (room.type != "public") continue;
-          var $roomItem = $(template(room));
-          $roomItem.children('a').bind('click', selectRoomListItem);
-          self.$unreadRoomList.append($roomItem.toggle(true));
-        }
-      });
+      $("#unread_count").text($("#firechat-unread-room-list li").length);
     });
   };
 
