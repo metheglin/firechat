@@ -84,19 +84,22 @@ body {
 .chat-group button.btn:focus {
     outline: none;
 }
-.chat-group button .chat_notification {
+.chat-group .chat_notification {
     position: absolute;
     right: -10px;
     top: -7px;
-    font-size: 10px;
+    font-size: 90%;
+    font-weight: bold;
     width: 20px;
     height: 20px;
     line-height: 20px;
+    z-index: 1;
 }
 .chat_notification {
     background: @accent_color;
     color: #FEF8F8;
     border-radius: 20px;
+    text-align: center;
 }
 .contact-list {
     height: 500px;
