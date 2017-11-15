@@ -184,15 +184,7 @@
       var self = this;
       var userId = message.userId;
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
-        // if(message.image){
-        //   var storageRef = firebase.storage().ref(message.image);
-        //   storageRef.getDownloadURL().then(function(url) {
-        //     message.image = url;
-        //     self.showMessage(roomId, message);
-        //   });
-        // }else{
-          this.showMessage(roomId, message);
-        // }
+        this.showMessage(roomId, message);
       }
     },
     _onRemoveMessage: function(roomId, messageId) {
@@ -959,32 +951,6 @@
         message: null
       }));
     }));
-    // Dropzone.options.uploader = self._dropzoneConfig(roomId, roomName);
-
-     // Image Upload
-    // var uploadImg = document.getElementById('uploadImg');
-    // uploadImg.addEventListener('change', function(e){
-    //   var file = e.target.files[0];
-    //   if(file){
-    //     var filepath = 'images/'+file.name;
-    //     var storageRef = firebase.storage().ref(filepath);
-    //     var task = storageRef.put(file);
-
-    //     task.on('state_changed',
-    //       function progress(snapshot){},
-    //       function error(err){},
-    //       function complete(){
-    //         uploadImg.value = "";
-    //         self._chat.sendMessage(roomId, filepath, 'image', self._sendCallback.bind(self, {
-    //           roomId: roomId,
-    //           roomName: roomName,
-    //           message: null
-    //         }));
-    //       }
-    //     );
-    //   }
-    // });
-
 
     // Populate and render the tab menu template.
     var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
@@ -999,26 +965,6 @@
         console.log("marked as READ:", roomId);
         self.doMarkAsRead( roomId );
       });
-      // MEMO: markAsReadはスクロールによって自動反映せず、
-      //       既読にするボタンを設けて、手動更新させる
-      // $messages.scroll(function(event) {
-      //   var $this = $(this),
-      //       roomId = $this.closest('[data-room-id]').data('room-id');
-
-      //   dam.execute(function(){
-      //     var elem = $this.get(0);
-      //     console.log("test", roomId, {
-      //       scrollTop: elem.scrollTop,
-      //       scrollHeight: elem.scrollHeight,
-      //       clientHeight: elem.clientHeight
-      //     });
-      //     if ( self.isAtBottom(elem) ) {
-      //       console.log("Marked as read.", roomId);
-      //       self._chat.markAsRead( roomId );
-      //     }
-          
-      //   });
-      // });
     });
 
     // Dynamically update the width of each tab based upon the number open.
