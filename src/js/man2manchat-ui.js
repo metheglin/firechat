@@ -475,18 +475,18 @@
   Man2ManChatUI.prototype.selectUnreadRoom = function() {
     var self = this;
 
-    $(this).parents('.chat-group').find('button').removeClass('active');
-    $(this).addClass('active');
+    var $this = $('#firechat-btn-unread-rooms');
+    $this.parents('.chat-group').find('button').removeClass('active');
+    $this.addClass('active');
     $('#firechat-unread-room-list').show();
     $('#firechat-tab-list').hide();
     $('.chat_search_box').css("visibility", 'hidden');
 
-    if ($(this).parent().hasClass('open')) {
+    if ($this.parent().hasClass('open')) {
       return;
     }
-
-    var $this = $(this),
-        template = FirechatDefaultTemplates["templates/room-list-item.html"],
+    
+    var template = FirechatDefaultTemplates["templates/room-list-item.html"],
         selectRoomListItem = function() {
           var parent = $(this).parent(),
               roomId = parent.data('room-id'),
