@@ -759,6 +759,13 @@
 
           $target = $(selector);
 
+          if ( $target.length <= 0 ) {
+            var roomId = selector.replace('#', '');
+            var roomName = $el.parent().data("roomName");
+            console.log("Loading new room...", roomId, roomName);
+            self.selectUserRoom(roomId, roomName);
+          }
+
           activate($this.parent('li'), $ul);
           activate($target, $target.parent(), function () {
             $this.trigger({
