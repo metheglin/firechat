@@ -47,7 +47,6 @@
     this.urlPattern = /\b(?:https?|ftp):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
     this.pseudoUrlPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
 
-    this._renderLayout();
 
     this._defaultAvatar = 'http://api.randomuser.me/portraits/men/56.jpg';
     this._sendCallback = undefined;
@@ -77,6 +76,22 @@
         }
       };
     };
+    this._roomTypeConfig = {
+      // "default": {
+      //   "id": "default",
+      //   "title": "Recent"
+      // },
+      "unread": {
+        "id": "unread",
+        "title": "未読",
+        "template_name": 'room-list-item',
+        "appendee_id": 'firechat-unread-room-list',
+        "active": true,
+        "show_count": true
+      }
+    };
+
+    this._renderLayout();
 
     // Grab shortcuts to commonly used jQuery elements.
     this.$wrapper = $('#firechat');
@@ -146,7 +161,8 @@
     _renderLayout: function() {
       var template = FirechatDefaultTemplates["templates/layout-full.html"];
       $(this._el).html(template({
-        maxLengthUsername: this.maxLengthUsername
+        maxLengthUsername: this.maxLengthUsername,
+        roomTypeConfig: this._roomTypeConfig
       }));
     },
 
@@ -440,38 +456,77 @@
     // });
   };
 
+  Man2ManChatUI.prototype.roomType = function( roomType ) {
+    var self = this;
+    var conf = self._roomTypeConfig[roomType];
+    return Object.assign({}, conf, {
+      template: FirechatDefaultTemplates["templates/" + conf.template_name + ".html"],
+      appendee_selector: '#' + conf.appendee_id,
+      appendee: $('#' + conf.appendee_id)
+    });
+  };
+
+  Man2ManChatUI.prototype.setRoomType = function( roomType, config ) {
+    var self = this;
+    self._roomTypeConfig[roomType] = config;
+  };
+
+  /**
+   * Return this format of object
+   * {
+   *   id: xxx,
+   *   type: "public",
+   *   name: xxx,
+   *   isRoomOpen: false,
+   *   avatar: xxx,
+   *   ...
+   * }
+   */
+  Man2ManChatUI.prototype.normalizeRoom = function( roomId, room ) {
+    var self = this;
+    return {
+      id: roomId,
+      type: "public",
+      name: room.name ? room.name : "不明のチャット",
+      isRoomOpen: false,
+      avatar: room.avatar ? room.avatar : self._defaultAvatar
+    };
+  };
+
+  Man2ManChatUI.prototype.makeRoomItem = function( roomType, normalizedRoom ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    var $roomItem = $(roomTypeConfig.template(normalizedRoom));
+    return $roomItem;
+  };
+
+  Man2ManChatUI.prototype.appendRoomItem = function( roomType, $roomItem ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    roomTypeConfig.appendee.append($roomItem.toggle(true));
+  };
+
+  Man2ManChatUI.prototype.setRoomItemCount = function( roomType ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    // roomTypeConfig.appendee.append($roomItem.toggle(true));
+    $(roomTypeConfig.selector + " .chat_count").text($(roomTypeConfig.selector + " li").length);
+  };
+
   Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
     var self = this;
     
-    var template = FirechatDefaultTemplates["templates/room-list-item.html"],
-        selectRoomListItem = function() {
-          var parent = $(this).parent(),
-              roomId = parent.data('room-id'),
-              roomName = parent.data('room-name');
-
-          if (self.$messages[roomId]) {
-            self.focusTab(roomId);
-          } else {
-            self._chat.enterRoom(roomId, roomName);
-          }
-          return false;
-        };
-
     self._chat.getUnreadRoomList(function(rooms) {
       self.$unreadRoomList.empty();
       for (var roomId in rooms) {
-        var room = rooms[roomId];
-        room.id   = roomId;
-        room.type = "public";
-        room.name = room.name ? room.name : "不明のチャット";
-        room.isRoomOpen = false;
-        room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
+        var room = self.normalizeRoom( roomId, rooms[roomId] );
         if (room.type != "public") continue;
-        var $roomItem = $(template(room));
-        $roomItem.children('a').bind('click', selectRoomListItem);
-        self.$unreadRoomList.append($roomItem.toggle(true));
+        var $roomItem = self.makeRoomItem( "unread", room );
+        self.appendRoomItem( "unread", $roomItem );
+        // self.$unreadRoomList.append($roomItem.toggle(true));
       }
-      $("#unread_count").text($("#firechat-unread-room-list li").length);
+      // $("#unread_count").text($("#firechat-unread-room-list li").length);
+      self.setRoomItemCount("unread");
     });
   };
 

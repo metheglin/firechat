@@ -11,23 +11,32 @@
         </div>
         <div class="chat-group col-sm-12">
           <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
-              <a href="#firechat-unread-room-list" aria-controls="firechat-unread-room-list" role="tab" data-toggle="tab">
-                未読
-                <span id="unread_count" class="chat_notification">0</span>
-              </a>
-            </li>
-            <li role="presentation">
+            <li id="roomtype_default_tab" role="presentation">
               <a href="#firechat-tab-list" aria-controls="firechat-tab-list" role="tab" data-toggle="tab">Recent</a>
             </li>
+            <% _.each(_.values(roomTypeConfig), function(roomType){ %>
+              <li role="presentation" class="<%= roomType.active ? 'active' : '' %>">
+                <a href="#<%= roomType.appendee_id %>" aria-controls="<%= roomType.appendee_id %>" role="tab" data-toggle="tab">
+                  <%= roomType.title %>
+                  <% if ( roomType.show_count ) { %>
+                    <span class="chat_count">0</span>
+                  <% } %>
+                </a>
+              </li>
+            <% }); %>
           </ul>
           
         </div>
         <div class="clearfix"></div>
 
         <div class="tab-content">
-          <ul role="tabpanel" class="list-group contact-list tab-pane active" id="firechat-unread-room-list"></ul>
           <ul role="tabpanel" class="list-group contact-list tab-pane" id="firechat-tab-list"></ul>
+          <% _.each(_.values(roomTypeConfig), function(roomType){ %>
+            <ul 
+              role="tabpanel" 
+              class="list-group contact-list tab-pane <%= roomType.active ? 'active' : '' %>" 
+              id="<%= roomType.appendee_id %>"></ul>
+          <% }); %>
         </div>
 
   </div>
