@@ -411,7 +411,7 @@
 
         if(messageType == 'image'){
           message.image = messageContent;
-        }else if(self._options.file_option && messageType == 'file'){
+        }else if(self._options.file_downloadable && messageType == 'file'){
           message.file = messageContent;
         }else{
           message.message = messageContent;
