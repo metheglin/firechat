@@ -399,7 +399,8 @@
     self._onLeaveRoom(roomId);
   };
 
-  Firechat.prototype.sendMessage = function(roomId, messageContent, messageType, cb) {
+  Firechat.prototype.sendMessage = function(roomId, messageContent, options, cb) {
+    var messageType = options ? options.attachment_type : null;
     var self = this,
         message = {
           userId: self._userId,
@@ -411,7 +412,7 @@
 
         if(messageType == 'image'){
           message.image = messageContent;
-        }else if(messageType == 'file'){
+        }else if(options.file_option && messageType == 'file'){
           message.file = messageContent;
         }else{
           message.message = messageContent;
@@ -429,9 +430,9 @@
     newMessageRef.setWithPriority(message, firebase.database.ServerValue.TIMESTAMP, cb);
   };
 
-  Firechat.prototype.sendAttachment = function(roomId, attachmentUrl, attachmentType, cb) {
+  Firechat.prototype.sendAttachment = function(roomId, attachmentUrl, options, cb) {
     var self = this;
-    return self.sendMessage(roomId, attachmentUrl, attachmentType, cb);
+    return self.sendMessage(roomId, attachmentUrl, options, cb);
   };
 
   Firechat.prototype.deleteMessage = function(roomId, messageId, cb) {
