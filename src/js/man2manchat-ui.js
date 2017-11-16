@@ -930,7 +930,7 @@
       if ((e.which === 13) && (message !== '')) {
         if(!e.shiftKey){
           $textarea.val('');
-          self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
+          self._chat.sendMessage(roomId, message, self._options, self._sendCallback.bind(self, {
             roomId: roomId,
             roomName: roomName,
             message: message
@@ -944,9 +944,9 @@
     var myDropzone = new Dropzone("#panel-message", self._dropzoneConfig(roomId, roomName, function( url ) {
       var imageExtensions = ["gif","jpeg","jpg","png","tif","tiff","bmp"];
       var attachmentExtension = url.split('?').shift().split('.').pop();
-      var attachmentType = (imageExtensions.indexOf(attachmentExtension) > -1) ? "image" : "file";
+      self._options.attachment_type = (imageExtensions.indexOf(attachmentExtension) > -1) ? "image" : "file";
 
-      self._chat.sendAttachment(roomId, url, attachmentType, self._sendCallback.bind(self, {
+      self._chat.sendAttachment(roomId, url, self._options, self._sendCallback.bind(self, {
         roomId: roomId,
         roomName: roomName,
         message: null
