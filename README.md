@@ -133,6 +133,7 @@ var chat = new Man2ManChatUI(
         "title": "ALL",
         "template_name": 'room-list-item',
         "appendee_id": 'firechat-all-room-list',
+        "tab_id": 'tab-firechat-all-room-list',
         "active": false,
         "show_count": false
       }

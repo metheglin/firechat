@@ -48,7 +48,7 @@
     this.pseudoUrlPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
 
 
-    this._defaultAvatar = 'http://api.randomuser.me/portraits/men/56.jpg';
+    this._defaultAvatar = this._options.default_avatar || 'http://api.randomuser.me/portraits/men/56.jpg';
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
@@ -86,6 +86,7 @@
         "title": "未読",
         "template_name": 'room-list-item',
         "appendee_id": 'firechat-unread-room-list',
+        "tab_id": 'tab-firechat-unread-room-list',
         "active": true,
         "show_count": true
       }
@@ -462,7 +463,9 @@
     return Object.assign({}, conf, {
       template: FirechatDefaultTemplates["templates/" + conf.template_name + ".html"],
       appendee_selector: '#' + conf.appendee_id,
-      appendee: $('#' + conf.appendee_id)
+      appendee: $('#' + conf.appendee_id),
+      tab_selector: '#' + conf.tab_id,
+      tab: $('#' + conf.tab_id)
     });
   };
 
@@ -513,7 +516,7 @@
   Man2ManChatUI.prototype.setRoomItemCount = function( roomType ) {
     var self = this;
     var roomTypeConfig = self.roomType(roomType);
-    $(roomTypeConfig.selector + " .chat_count").text($(roomTypeConfig.selector + " li").length);
+    $(roomTypeConfig.tab_selector + " .chat_count").text($(roomTypeConfig.appendee_selector + " li").length);
   };
 
   /**
@@ -1254,11 +1257,6 @@
   Man2ManChatUI.prototype.setDropzoneConfig = function(config) {
     var self = this;
     self._dropzoneConfig = config;
-  };
-
-  Man2ManChatUI.prototype.setDefaultAvatar = function(avatar) {
-    var self = this;
-    self._defaultAvatar = avatar;
   };
 
 })(jQuery);

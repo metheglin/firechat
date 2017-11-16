@@ -16,7 +16,11 @@
             </li>
             <% _.each(_.values(roomTypeConfig), function(roomType){ %>
               <li role="presentation" class="<%= roomType.active ? 'active' : '' %>">
-                <a href="#<%= roomType.appendee_id %>" aria-controls="<%= roomType.appendee_id %>" role="tab" data-toggle="tab">
+                <a 
+                  id="<%= roomType.tab_id %>"
+                  href="#<%= roomType.appendee_id %>" 
+                  aria-controls="<%= roomType.appendee_id %>" 
+                  role="tab" data-toggle="tab">
                   <%= roomType.title %>
                   <% if ( roomType.show_count ) { %>
                     <span class="chat_count">0</span>
