@@ -76,7 +76,7 @@
         }
       };
     };
-    this._roomTypeConfig = {
+    this._roomTypeConfig = Object.assign({
       // "default": {
       //   "id": "default",
       //   "title": "Recent"
@@ -89,7 +89,7 @@
         "active": true,
         "show_count": true
       }
-    };
+    }, this._options.room_type_config);
 
     this._renderLayout();
 
@@ -466,10 +466,10 @@
     });
   };
 
-  Man2ManChatUI.prototype.setRoomType = function( roomType, config ) {
-    var self = this;
-    self._roomTypeConfig[roomType] = config;
-  };
+  // Man2ManChatUI.prototype.setRoomType = function( roomType, config ) {
+  //   var self = this;
+  //   self._roomTypeConfig[roomType] = config;
+  // };
 
   /**
    * Return this format of object

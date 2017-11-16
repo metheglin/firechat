@@ -119,3 +119,36 @@ return {
   }
 };
 ```
+
+### Customizing RoomType Tab
+
+```
+var chat = new Man2ManChatUI(
+  chatRef, 
+  document.getElementById("firechat-wrapper"),
+  {
+    "room_type_config": {
+      "all": {
+        "id": "all",
+        "title": "ALL",
+        "template_name": 'room-list-item',
+        "appendee_id": 'firechat-all-room-list',
+        "active": false,
+        "show_count": false
+      }
+    }
+  }
+);
+```
+
+### Customizing File Downloader
+
+```
+var chat = new Man2ManChatUI(
+  chatRef, 
+  document.getElementById("firechat-wrapper"),
+  {
+    "file_downloader": false,
+  }
+);
+```
