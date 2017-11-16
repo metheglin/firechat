@@ -493,6 +493,10 @@
     };
   };
 
+  Man2ManChatUI.prototype.normalizeRoomList = function( rooms ) {
+    return rooms;
+  };
+
   Man2ManChatUI.prototype.makeRoomItem = function( roomType, normalizedRoom ) {
     var self = this;
     var roomTypeConfig = self.roomType(roomType);
@@ -509,24 +513,48 @@
   Man2ManChatUI.prototype.setRoomItemCount = function( roomType ) {
     var self = this;
     var roomTypeConfig = self.roomType(roomType);
-    // roomTypeConfig.appendee.append($roomItem.toggle(true));
     $(roomTypeConfig.selector + " .chat_count").text($(roomTypeConfig.selector + " li").length);
+  };
+
+  /**
+   * loadType: "replace", "append"
+   */
+  Man2ManChatUI.prototype.loadRoomList = function( roomType, rooms, loadType ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    loadType = loadType || "replace";
+
+    if ( loadType === "replace" ) {
+      roomTypeConfig.appendee.empty();
+    }
+
+    rooms = self.normalizeRoomList( rooms );
+
+    for ( var roomId in rooms ) {
+      var room = self.normalizeRoom( roomId, rooms[roomId] );
+      if (room.type != "public") continue;
+      var $roomItem = self.makeRoomItem( roomType, room );
+      self.appendRoomItem( roomType, $roomItem );
+    }
+
+    self.setRoomItemCount(roomType);
   };
 
   Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
     var self = this;
     
     self._chat.getUnreadRoomList(function(rooms) {
-      self.$unreadRoomList.empty();
-      for (var roomId in rooms) {
-        var room = self.normalizeRoom( roomId, rooms[roomId] );
-        if (room.type != "public") continue;
-        var $roomItem = self.makeRoomItem( "unread", room );
-        self.appendRoomItem( "unread", $roomItem );
-        // self.$unreadRoomList.append($roomItem.toggle(true));
-      }
-      // $("#unread_count").text($("#firechat-unread-room-list li").length);
-      self.setRoomItemCount("unread");
+      self.loadRoomList( "unread", rooms, "replace" );
+      // self.$unreadRoomList.empty();
+      // for (var roomId in rooms) {
+      //   var room = self.normalizeRoom( roomId, rooms[roomId] );
+      //   if (room.type != "public") continue;
+      //   var $roomItem = self.makeRoomItem( "unread", room );
+      //   self.appendRoomItem( "unread", $roomItem );
+      //   // self.$unreadRoomList.append($roomItem.toggle(true));
+      // }
+      // // $("#unread_count").text($("#firechat-unread-room-list li").length);
+      // self.setRoomItemCount("unread");
     });
   };
 

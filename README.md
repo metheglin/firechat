@@ -141,6 +141,37 @@ var chat = new Man2ManChatUI(
 );
 ```
 
+```
+$(document).on('click', '.search', function(){
+  $.ajax({
+    url: "/room_search",
+  })
+  .done(function( rooms ) {
+    // roomsObj supposed to be like this:
+    // {
+    //   "roomid1": {
+    //     name: "abcdefg",
+    //     avatar: "https://github.com/fluidicon.png",
+    //   },
+    //   "roomid2": {
+    //     name: "metheglin",
+    //     avatar: "https://github.com/fluidicon.png",
+    //   },
+    //   "roomid3": {
+    //     name: "jjjj",
+    //     avatar: "https://github.com/fluidicon.png",
+    //   },
+    // }
+    var roomsObj = rooms.reduce((acc,room)=>{
+      acc[room.id] = room
+      return acc
+    }, {})
+
+    chat.loadRoomList( "all", roomsObj, "replace");
+  });
+})
+```
+
 ### Customizing File Downloader
 
 ```
