@@ -411,7 +411,7 @@
 
         if(messageType == 'image'){
           message.image = messageContent;
-        }else if(messageType == 'file'){
+        }else if(self._options.file_downloadable && messageType == 'file'){
           message.file = messageContent;
         }else{
           message.message = messageContent;
@@ -568,15 +568,7 @@
 
   Firechat.prototype.getUnreadRoomList = function(cb) {
     var self = this;
-
-    // self._roomRef.once('value', function(snapshot) {
-    //   cb(snapshot.val());
-    // });
-
-    // self._staffUnreadRoomsRef.limitToLast(30).on('child_added', function(snapshot) {
-    //   console.log("unread room fetched", snapshot.val());
-    //   cb(snapshot.val());
-    // });
+    
     self._staffUnreadRoomsRef.limitToLast(30).on('value', function(snapshot) {
       console.log("unread room fetched", snapshot.val());
       cb(snapshot.val());

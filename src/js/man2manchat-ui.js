@@ -99,6 +99,8 @@
 
     // Setup bindings to internal methods
     this._bindDataEvents();
+
+    this.selectUnreadRoom();
   }
 
   // Run Man2ManChatUI in *noConflict* mode, returning the `Man2ManChatUI` variable to
@@ -182,15 +184,7 @@
       var self = this;
       var userId = message.userId;
       if (!this._user || !this._user.muted || !this._user.muted[userId]) {
-        // if(message.image){
-        //   var storageRef = firebase.storage().ref(message.image);
-        //   storageRef.getDownloadURL().then(function(url) {
-        //     message.image = url;
-        //     self.showMessage(roomId, message);
-        //   });
-        // }else{
-          this.showMessage(roomId, message);
-        // }
+        this.showMessage(roomId, message);
       }
     },
     _onRemoveMessage: function(roomId, messageId) {
@@ -467,47 +461,52 @@
   Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
     var self = this;
 
-    $('#firechat-btn-unread-rooms').bind('click', function() {
-      $(this).parents('.chat-group').find('button').removeClass('active');
-      $(this).addClass('active');
-      $('#firechat-unread-room-list').show();
-      $('#firechat-tab-list').hide();
-      $('.chat_search_box').css("visibility", 'hidden');
+    $('#firechat-btn-unread-rooms').bind('click', self.selectUnreadRoom.bind(self));
+  };
 
-      if ($(this).parent().hasClass('open')) {
-        return;
+  Man2ManChatUI.prototype.selectUnreadRoom = function() {
+    var self = this;
+
+    var $this = $('#firechat-btn-unread-rooms');
+    $this.parents('.chat-group').find('button').removeClass('active');
+    $this.addClass('active');
+    $('#firechat-unread-room-list').show();
+    $('#firechat-tab-list').hide();
+    $('.chat_search_box').css("visibility", 'hidden');
+
+    if ($this.parent().hasClass('open')) {
+      return;
+    }
+    
+    var template = FirechatDefaultTemplates["templates/room-list-item.html"],
+        selectRoomListItem = function() {
+          var parent = $(this).parent(),
+              roomId = parent.data('room-id'),
+              roomName = parent.data('room-name');
+
+          if (self.$messages[roomId]) {
+            self.focusTab(roomId);
+          } else {
+            self._chat.enterRoom(roomId, roomName);
+          }
+          return false;
+        };
+
+    self._chat.getUnreadRoomList(function(rooms) {
+      self.$unreadRoomList.empty();
+      for (var roomId in rooms) {
+        var room = rooms[roomId];
+        room.id   = roomId;
+        room.type = "public";
+        room.name = room.name ? room.name : "不明のチャット";
+        room.isRoomOpen = false;
+        room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
+        if (room.type != "public") continue;
+        var $roomItem = $(template(room));
+        $roomItem.children('a').bind('click', selectRoomListItem);
+        self.$unreadRoomList.append($roomItem.toggle(true));
       }
-
-      var $this = $(this),
-          template = FirechatDefaultTemplates["templates/room-list-item.html"],
-          selectRoomListItem = function() {
-            var parent = $(this).parent(),
-                roomId = parent.data('room-id'),
-                roomName = parent.data('room-name');
-
-            if (self.$messages[roomId]) {
-              self.focusTab(roomId);
-            } else {
-              self._chat.enterRoom(roomId, roomName);
-            }
-            return false;
-          };
-
-      self._chat.getUnreadRoomList(function(rooms) {
-        self.$unreadRoomList.empty();
-        for (var roomId in rooms) {
-          var room = rooms[roomId];
-          room.id   = roomId;
-          room.type = "public";
-          room.name = room.name ? room.name : "不明のチャット";
-          room.isRoomOpen = false;
-          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
-          if (room.type != "public") continue;
-          var $roomItem = $(template(room));
-          $roomItem.children('a').bind('click', selectRoomListItem);
-          self.$unreadRoomList.append($roomItem.toggle(true));
-        }
-      });
+      $("#unread_count").text($("#firechat-unread-room-list li").length);
     });
   };
 
@@ -952,32 +951,6 @@
         message: null
       }));
     }));
-    // Dropzone.options.uploader = self._dropzoneConfig(roomId, roomName);
-
-     // Image Upload
-    // var uploadImg = document.getElementById('uploadImg');
-    // uploadImg.addEventListener('change', function(e){
-    //   var file = e.target.files[0];
-    //   if(file){
-    //     var filepath = 'images/'+file.name;
-    //     var storageRef = firebase.storage().ref(filepath);
-    //     var task = storageRef.put(file);
-
-    //     task.on('state_changed',
-    //       function progress(snapshot){},
-    //       function error(err){},
-    //       function complete(){
-    //         uploadImg.value = "";
-    //         self._chat.sendMessage(roomId, filepath, 'image', self._sendCallback.bind(self, {
-    //           roomId: roomId,
-    //           roomName: roomName,
-    //           message: null
-    //         }));
-    //       }
-    //     );
-    //   }
-    // });
-
 
     // Populate and render the tab menu template.
     var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
@@ -992,26 +965,6 @@
         console.log("marked as READ:", roomId);
         self.doMarkAsRead( roomId );
       });
-      // MEMO: markAsReadはスクロールによって自動反映せず、
-      //       既読にするボタンを設けて、手動更新させる
-      // $messages.scroll(function(event) {
-      //   var $this = $(this),
-      //       roomId = $this.closest('[data-room-id]').data('room-id');
-
-      //   dam.execute(function(){
-      //     var elem = $this.get(0);
-      //     console.log("test", roomId, {
-      //       scrollTop: elem.scrollTop,
-      //       scrollHeight: elem.scrollHeight,
-      //       clientHeight: elem.clientHeight
-      //     });
-      //     if ( self.isAtBottom(elem) ) {
-      //       console.log("Marked as read.", roomId);
-      //       self._chat.markAsRead( roomId );
-      //     }
-          
-      //   });
-      // });
     });
 
     // Dynamically update the width of each tab based upon the number open.
