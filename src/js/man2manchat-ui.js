@@ -511,6 +511,12 @@
     };
   };
 
+  Man2ManChatUI.prototype.appendRoom = function( roomType, normalizedRoom ) {
+    var self = this;
+    var $roomItem = self.makeRoomItem( roomType, normalizedRoom );
+    self.appendRoomItem( roomType, $roomItem );
+  };
+
   Man2ManChatUI.prototype.makeRoomItem = function( roomType, normalizedRoom ) {
     var self = this;
     var roomTypeConfig = self.roomType(roomType);
@@ -545,8 +551,9 @@
       for ( var roomId in rooms ) {
         var room = self.normalizeRoom( roomId, rooms[roomId] );
         if (room.type != "public") continue;
-        var $roomItem = self.makeRoomItem( roomType, room );
-        self.appendRoomItem( roomType, $roomItem );
+        self.appendRoom( roomType, room );
+        // var $roomItem = self.makeRoomItem( roomType, room );
+        // self.appendRoomItem( roomType, $roomItem );
       }
       resolve(data);
     });
