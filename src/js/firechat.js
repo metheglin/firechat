@@ -327,6 +327,7 @@
       console.log("room", room);
       if ( ! room ) {
         self.createRoom(_roomId, _roomName, _roomType);
+        return;
       }
       var roomName = room.name;
 

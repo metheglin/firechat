@@ -538,6 +538,10 @@
 
   Man2ManChatUI.prototype.beforeLoadRoomList = function( data ) {
     var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+    var roomTypeConfig = self.roomType(roomType);
+    if ( loadType === "replace" ) {
+      roomTypeConfig.appendee.empty();
+    }
     return new Promise(function(resolve, reject){
       resolve(data);
     });
@@ -577,9 +581,9 @@
     var roomTypeConfig = self.roomType(roomType);
     loadType = loadType || "replace";
 
-    if ( loadType === "replace" ) {
-      roomTypeConfig.appendee.empty();
-    }
+    // if ( loadType === "replace" ) {
+    //   roomTypeConfig.appendee.empty();
+    // }
 
     var data = {
       roomType: roomType, 
@@ -807,6 +811,7 @@
             var roomName = $el.parent().data("roomName");
             console.log("Loading new room...", roomId, roomName);
             self.selectUserRoom(roomId, roomName);
+            return;
           }
 
           activate($this.parent('li'), $ul);
@@ -816,6 +821,7 @@
               relatedTarget: previous
             });
           });
+          showDetail($el);
         },
         activate = function (element, container, callback) {
           var $active = container.find('> .active'),
@@ -882,7 +888,7 @@
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
-      showDetail($(this));
+      // showDetail($(this));
     });
   };
 
