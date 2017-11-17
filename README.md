@@ -180,7 +180,7 @@ var chat = new Man2ManChatUI(
   chatRef, 
   document.getElementById("firechat-wrapper"),
   {
-    "file_downloader": false,
+    "file_downloadable": false,
   }
 );
 ```
