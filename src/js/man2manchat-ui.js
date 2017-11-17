@@ -492,12 +492,11 @@
       type: "public",
       name: room.name ? room.name : "不明のチャット",
       isRoomOpen: false,
-      avatar: room.avatar ? room.avatar : self._defaultAvatar
+      avatar: room.avatar ? room.avatar : self._defaultAvatar,
+      roommeta: {
+        name: room.name ? room.name : "不明のチャット"
+      }
     };
-  };
-
-  Man2ManChatUI.prototype.normalizeRoomList = function( rooms ) {
-    return rooms;
   };
 
   Man2ManChatUI.prototype.makeRoomItem = function( roomType, normalizedRoom ) {
@@ -519,6 +518,38 @@
     $(roomTypeConfig.tab_selector + " .chat_count").text($(roomTypeConfig.appendee_selector + " li").length);
   };
 
+  Man2ManChatUI.prototype.beforeLoadRoomList = function( data ) {
+    var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+    return new Promise(function(resolve, reject){
+      resolve(data);
+    });
+  };
+
+  Man2ManChatUI.prototype.executeLoadRoomList = function( data ) {
+    var self = this;
+    var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+
+    return new Promise(function(resolve, reject){
+      for ( var roomId in rooms ) {
+        var room = self.normalizeRoom( roomId, rooms[roomId] );
+        if (room.type != "public") continue;
+        var $roomItem = self.makeRoomItem( roomType, room );
+        self.appendRoomItem( roomType, $roomItem );
+      }
+      resolve(data);
+    });
+  };
+
+  Man2ManChatUI.prototype.afterLoadRoomList = function( data ) {
+    var self = this;
+    var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+
+    return new Promise(function(resolve, reject){
+      self.setRoomItemCount(roomType);
+      resolve(data);
+    });
+  };
+
   /**
    * loadType: "replace", "append"
    */
@@ -531,16 +562,16 @@
       roomTypeConfig.appendee.empty();
     }
 
-    rooms = self.normalizeRoomList( rooms );
-
-    for ( var roomId in rooms ) {
-      var room = self.normalizeRoom( roomId, rooms[roomId] );
-      if (room.type != "public") continue;
-      var $roomItem = self.makeRoomItem( roomType, room );
-      self.appendRoomItem( roomType, $roomItem );
-    }
-
-    self.setRoomItemCount(roomType);
+    var data = {
+      roomType: roomType, 
+      rooms: rooms, 
+      loadType: loadType
+    };
+    self.beforeLoadRoomList( data ).then(function(data){
+      return self.executeLoadRoomList(data);
+    }).then(function(data){
+      return self.afterLoadRoomList(data);
+    });
   };
 
   Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
@@ -548,16 +579,6 @@
     
     self._chat.getUnreadRoomList(function(rooms) {
       self.loadRoomList( "unread", rooms, "replace" );
-      // self.$unreadRoomList.empty();
-      // for (var roomId in rooms) {
-      //   var room = self.normalizeRoom( roomId, rooms[roomId] );
-      //   if (room.type != "public") continue;
-      //   var $roomItem = self.makeRoomItem( "unread", room );
-      //   self.appendRoomItem( "unread", $roomItem );
-      //   // self.$unreadRoomList.append($roomItem.toggle(true));
-      // }
-      // // $("#unread_count").text($("#firechat-unread-room-list li").length);
-      // self.setRoomItemCount("unread");
     });
   };
 
@@ -963,11 +984,17 @@
       return;
     }
 
-    var room = {
+    // var room = {
+    //   id: roomId,
+    //   name: roomName,
+    //   avatar: roomAvatar ? roomAvatar : self._defaultAvatar
+    // };
+    var room = self.normalizeRoom( roomId, {
       id: roomId,
+      room_id: roomId,
       name: roomName,
       avatar: roomAvatar ? roomAvatar : self._defaultAvatar
-    };
+    });
 
     // Populate and render the tab content template.
     var tabTemplate = FirechatDefaultTemplates["templates/tab-content.html"];

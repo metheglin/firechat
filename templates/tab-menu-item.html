@@ -1,7 +1,10 @@
 <li data-room-id='<%- id %>'
-  data-roommeta-name='<%- name %>'
-  data-roommeta-avatar='<%- avatar %>'
-  data-roommeta-email="">
+  <% if (roommeta) { %>
+    <% Object.keys(roommeta).forEach(function(key){ %>
+      <%= "data-roommeta-" + key + "='" + roommeta[key] + "'" %>
+    <% }) %>
+  <% } %>
+  >
   <a class="row" href='#<%- id %>' data-toggle='firechat-tab' title='<%- name %>'>
     <div class="col-xs-12 col-sm-4">
       <img src="<%= avatar %>" alt="<%- name %>" class="img-responsive img-circle" />
