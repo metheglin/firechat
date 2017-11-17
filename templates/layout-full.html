@@ -10,19 +10,38 @@
           </div>
         </div>
         <div class="chat-group col-sm-12">
-          <div class="col-sm-5">
-            <button class="active" type="button" id="firechat-btn-unread-rooms">未読<span id="unread_count" class="chat_notification">0</span></button>
-          </div>
-          <div class="col-sm-5 text-right">
-            <button class="" type="button" id="firechat-btn-rooms">All<span class="chat_notification hide">0</span></button>
-          </div>
+          <ul class="nav nav-tabs" role="tablist">
+            <li id="roomtype_default_tab" role="presentation">
+              <a href="#firechat-tab-list" aria-controls="firechat-tab-list" role="tab" data-toggle="tab">Recent</a>
+            </li>
+            <% _.each(_.values(roomTypeConfig), function(roomType){ %>
+              <li role="presentation" class="<%= roomType.active ? 'active' : '' %>">
+                <a 
+                  id="<%= roomType.tab_id %>"
+                  href="#<%= roomType.appendee_id %>" 
+                  aria-controls="<%= roomType.appendee_id %>" 
+                  role="tab" data-toggle="tab">
+                  <%= roomType.title %>
+                  <% if ( roomType.show_count ) { %>
+                    <span class="chat_count">0</span>
+                  <% } %>
+                </a>
+              </li>
+            <% }); %>
+          </ul>
+          
         </div>
         <div class="clearfix"></div>
 
-        <ul class="list-group contact-list" id='firechat-unread-room-list'></ul>
-        <ul class="list-group contact-list" id='firechat-tab-list' style="display: none;"></ul>
-
-
+        <div class="tab-content">
+          <ul role="tabpanel" class="list-group contact-list tab-pane" id="firechat-tab-list"></ul>
+          <% _.each(_.values(roomTypeConfig), function(roomType){ %>
+            <ul 
+              role="tabpanel" 
+              class="list-group contact-list tab-pane <%= roomType.active ? 'active' : '' %>" 
+              id="<%= roomType.appendee_id %>"></ul>
+          <% }); %>
+        </div>
 
   </div>
   <div class="col-md-6" id="chat_middle">

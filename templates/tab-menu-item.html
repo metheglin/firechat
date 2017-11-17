@@ -1,19 +1,19 @@
 <li data-room-id='<%- id %>'
-  data-roommeta-name='<%- name %>'
-  data-roommeta-avatar='<%- avatar %>'
-  data-roommeta-email="">
-  <a href='#<%- id %>' data-toggle='firechat-tab' title='<%- name %>'>
-    <div class="row_corner">テスト</div>
+  <% if (roommeta) { %>
+    <% Object.keys(roommeta).forEach(function(key){ %>
+      <%= "data-roommeta-" + key + "='" + roommeta[key] + "'" %>
+    <% }) %>
+  <% } %>
+  >
+  <a class="row" href='#<%- id %>' data-toggle='firechat-tab' title='<%- name %>'>
     <div class="col-xs-12 col-sm-4">
       <img src="<%= avatar %>" alt="<%- name %>" class="img-responsive img-circle" />
     </div>
     <div class="col-xs-12 col-sm-8">
       <span class="name"><%- name %></span>
-      <span>
-        <!-- <i class="famfamfam-flag-jp"></i> -->
-        <span class="chat_notification hide">NEW</span>
-      </span>
+      <div>
+        <span href='#!' data-event='firechat-close-tab' class='icon close' style='15px 5px' title='Leave Room'></span>
+      </div>
     </div>
-    <div class="clearfix"></div>
   </a>
 </li>
