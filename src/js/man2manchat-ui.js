@@ -85,8 +85,6 @@
         "id": "unread",
         "title": "未読",
         "template_name": 'room-list-item',
-        "appendee_id": 'firechat-unread-room-list',
-        "tab_id": 'tab-firechat-unread-room-list',
         "active": true,
         "show_count": true
       }
@@ -160,10 +158,13 @@
     },
 
     _renderLayout: function() {
+      var self = this;
       var template = FirechatDefaultTemplates["templates/layout-full.html"];
       $(this._el).html(template({
         maxLengthUsername: this.maxLengthUsername,
-        roomTypeConfig: this._roomTypeConfig
+        roomTypeConfig: Object.keys(this._roomTypeConfig).map(function(key){
+          return self.roomType(key);
+        })
       }));
     },
 
@@ -460,12 +461,23 @@
   Man2ManChatUI.prototype.roomType = function( roomType ) {
     var self = this;
     var conf = self._roomTypeConfig[roomType];
+
+    var tab_id      = conf.tab_id || 'tab-firechat-' + conf.id + '-room-list';
+    var tabpanel_id = conf.tabpanel_id || 'tabpanel-firechat-' + conf.id + '-room-list';
+    var appendee_id = conf.appendee_id || 'appendee-firechat-' + conf.id + '-room-list';
+    var template    = conf.template || FirechatDefaultTemplates["templates/" + conf.template_name + ".html"];
+
     return Object.assign({}, conf, {
-      template: FirechatDefaultTemplates["templates/" + conf.template_name + ".html"],
-      appendee_selector: '#' + conf.appendee_id,
-      appendee: $('#' + conf.appendee_id),
-      tab_selector: '#' + conf.tab_id,
-      tab: $('#' + conf.tab_id)
+      template:           template,
+      tab_id:             tab_id,
+      tab_selector:       '#' + tab_id,
+      tab:                $('#' + tab_id),
+      tabpanel_id:        tabpanel_id,
+      tabpanel_selector:  '#' + tabpanel_id,
+      tabpanel:           $('#' + tabpanel_id),
+      appendee_id:        appendee_id,
+      appendee_selector:  '#' + appendee_id,
+      appendee:           $('#' + appendee_id)
     });
   };
 

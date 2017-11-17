@@ -18,8 +18,8 @@
               <li role="presentation" class="<%= roomType.active ? 'active' : '' %>">
                 <a 
                   id="<%= roomType.tab_id %>"
-                  href="#<%= roomType.appendee_id %>" 
-                  aria-controls="<%= roomType.appendee_id %>" 
+                  href="<%= roomType.tabpanel_selector %>" 
+                  aria-controls="<%= roomType.tabpanel_id %>" 
                   role="tab" data-toggle="tab">
                   <%= roomType.title %>
                   <% if ( roomType.show_count ) { %>
@@ -39,7 +39,9 @@
             <ul 
               role="tabpanel" 
               class="list-group contact-list tab-pane <%= roomType.active ? 'active' : '' %>" 
-              id="<%= roomType.appendee_id %>"></ul>
+              id="<%= roomType.tabpanel_id %>">
+              <div class="" id="<%= roomType.appendee_id %>">
+            </ul>
           <% }); %>
         </div>
 
