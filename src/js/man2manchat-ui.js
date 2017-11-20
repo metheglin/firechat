@@ -47,9 +47,8 @@
     this.urlPattern = /\b(?:https?|ftp):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
     this.pseudoUrlPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
 
-    this._renderLayout();
 
-    this._defaultAvatar = 'http://api.randomuser.me/portraits/men/56.jpg';
+    this._defaultAvatar = this._options.default_avatar || 'http://api.randomuser.me/portraits/men/56.jpg';
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
@@ -77,6 +76,21 @@
         }
       };
     };
+    this._roomTypeConfig = Object.assign({
+      // "default": {
+      //   "id": "default",
+      //   "title": "Recent"
+      // },
+      "unread": {
+        "id": "unread",
+        "title": "未読",
+        "template_name": 'room-list-item',
+        "active": true,
+        "show_count": true
+      }
+    }, this._options.room_type_config);
+
+    this._renderLayout();
 
     // Grab shortcuts to commonly used jQuery elements.
     this.$wrapper = $('#firechat');
@@ -99,8 +113,6 @@
 
     // Setup bindings to internal methods
     this._bindDataEvents();
-
-    this.selectUnreadRoom();
   }
 
   // Run Man2ManChatUI in *noConflict* mode, returning the `Man2ManChatUI` variable to
@@ -120,7 +132,7 @@
       this._bindForUnreadRoomList();
       this._bindForUserRoomList();
       this._bindForUserSearch();
-      this._bindForUserMuting();
+      // this._bindForUserMuting();
 
       // Generic, non-chat-specific interactive elements.
       this._setupTabs();
@@ -138,17 +150,21 @@
       this._chat.on('message-remove', this._onRemoveMessage.bind(this));
 
       // Bind events related to chat invitations.
-      this._chat.on('room-invite', this._onChatInvite.bind(this));
-      this._chat.on('room-invite-response', this._onChatInviteResponse.bind(this));
+      // this._chat.on('room-invite', this._onChatInvite.bind(this));
+      // this._chat.on('room-invite-response', this._onChatInviteResponse.bind(this));
 
       // Binds events related to admin or moderator notifications.
       this._chat.on('notification', this._onNotification.bind(this));
     },
 
     _renderLayout: function() {
+      var self = this;
       var template = FirechatDefaultTemplates["templates/layout-full.html"];
       $(this._el).html(template({
-        maxLengthUsername: this.maxLengthUsername
+        maxLengthUsername: this.maxLengthUsername,
+        roomTypeConfig: Object.keys(this._roomTypeConfig).map(function(key){
+          return self.roomType(key);
+        })
       }));
     },
 
@@ -192,49 +208,49 @@
     },
 
     // Events related to chat invitations.
-    _onChatInvite: function(invitation) {
-      var self = this;
-      var template = FirechatDefaultTemplates["templates/prompt-invitation.html"];
-      var $prompt = this.prompt('Invite', template(invitation));
-      $prompt.find('a.close').click(function() {
-        $prompt.remove();
-        self._chat.declineInvite(invitation.id);
-        return false;
-      });
+    // _onChatInvite: function(invitation) {
+    //   var self = this;
+    //   var template = FirechatDefaultTemplates["templates/prompt-invitation.html"];
+    //   var $prompt = this.prompt('Invite', template(invitation));
+    //   $prompt.find('a.close').click(function() {
+    //     $prompt.remove();
+    //     self._chat.declineInvite(invitation.id);
+    //     return false;
+    //   });
 
-      $prompt.find('[data-toggle=accept]').click(function() {
-        $prompt.remove();
-        self._chat.acceptInvite(invitation.id);
-        return false;
-      });
+    //   $prompt.find('[data-toggle=accept]').click(function() {
+    //     $prompt.remove();
+    //     self._chat.acceptInvite(invitation.id);
+    //     return false;
+    //   });
 
-      $prompt.find('[data-toggle=decline]').click(function() {
-        $prompt.remove();
-        self._chat.declineInvite(invitation.id);
-        return false;
-      });
-    },
-    _onChatInviteResponse: function(invitation) {
-      if (!invitation.status) return;
+    //   $prompt.find('[data-toggle=decline]').click(function() {
+    //     $prompt.remove();
+    //     self._chat.declineInvite(invitation.id);
+    //     return false;
+    //   });
+    // },
+    // _onChatInviteResponse: function(invitation) {
+    //   if (!invitation.status) return;
 
-      var self = this,
-          template = FirechatDefaultTemplates["templates/prompt-invite-reply.html"],
-          $prompt;
+    //   var self = this,
+    //       template = FirechatDefaultTemplates["templates/prompt-invite-reply.html"],
+    //       $prompt;
 
-      if (invitation.status && invitation.status === 'accepted') {
-        $prompt = this.prompt('Accepted', template(invitation));
-        this._chat.getRoom(invitation.roomId, function(room) {
-          self.attachTab(invitation.roomId, room.name);
-        });
-      } else {
-        $prompt = this.prompt('Declined', template(invitation));
-      }
+    //   if (invitation.status && invitation.status === 'accepted') {
+    //     $prompt = this.prompt('Accepted', template(invitation));
+    //     this._chat.getRoom(invitation.roomId, function(room) {
+    //       self.attachTab(invitation.roomId, room.name);
+    //     });
+    //   } else {
+    //     $prompt = this.prompt('Declined', template(invitation));
+    //   }
 
-      $prompt.find('a.close').click(function() {
-        $prompt.remove();
-        return false;
-      });
-    },
+    //   $prompt.find('a.close').click(function() {
+    //     $prompt.remove();
+    //     return false;
+    //   });
+    // },
 
     // Events related to admin or moderator notifications.
     _onNotification: function(notification) {
@@ -270,9 +286,9 @@
     self._chat.setUser(userId, userName, userAvatar, function(user) {
       self._user = user;
 
-      if (self._chat.userIsModerator()) {
-        self._bindSuperuserUIEvents();
-      }
+      // if (self._chat.userIsModerator()) {
+      //   self._bindSuperuserUIEvents();
+      // }
 
       if ( callback ) {
         callback( self );
@@ -295,88 +311,88 @@
    * Binds a custom context menu to messages for superusers to warn or ban
    * users for violating terms of service.
    */
-  Man2ManChatUI.prototype._bindSuperuserUIEvents = function() {
-    var self = this,
-        parseMessageVars = function(event) {
-          var $this = $(this),
-          messageId = $this.closest('[data-message-id]').data('message-id'),
-          userId = $('[data-message-id="' + messageId + '"]').closest('[data-user-id]').data('user-id'),
-          roomId = $('[data-message-id="' + messageId + '"]').closest('[data-room-id]').data('room-id');
+  // Man2ManChatUI.prototype._bindSuperuserUIEvents = function() {
+  //   var self = this,
+  //       parseMessageVars = function(event) {
+  //         var $this = $(this),
+  //         messageId = $this.closest('[data-message-id]').data('message-id'),
+  //         userId = $('[data-message-id="' + messageId + '"]').closest('[data-user-id]').data('user-id'),
+  //         roomId = $('[data-message-id="' + messageId + '"]').closest('[data-room-id]').data('room-id');
 
-          return { messageId: messageId, userId: userId, roomId: roomId };
-        },
-        clearMessageContextMenus = function() {
-          // Remove any context menus currently showing.
-          $('[data-toggle="firechat-contextmenu"]').each(function() {
-            $(this).remove();
-          });
+  //         return { messageId: messageId, userId: userId, roomId: roomId };
+  //       },
+  //       clearMessageContextMenus = function() {
+  //         // Remove any context menus currently showing.
+  //         $('[data-toggle="firechat-contextmenu"]').each(function() {
+  //           $(this).remove();
+  //         });
 
-          // Remove any messages currently highlighted.
-          $('#firechat .message.highlighted').each(function() {
-            $(this).removeClass('highlighted');
-          });
-        },
-        showMessageContextMenu = function(event) {
-          var $this = $(this),
-              $message = $this.closest('[data-message-id]'),
-              template = FirechatDefaultTemplates["templates/message-context-menu.html"],
-              messageVars = parseMessageVars.call(this, event),
-              $template;
+  //         // Remove any messages currently highlighted.
+  //         $('#firechat .message.highlighted').each(function() {
+  //           $(this).removeClass('highlighted');
+  //         });
+  //       },
+  //       showMessageContextMenu = function(event) {
+  //         var $this = $(this),
+  //             $message = $this.closest('[data-message-id]'),
+  //             template = FirechatDefaultTemplates["templates/message-context-menu.html"],
+  //             messageVars = parseMessageVars.call(this, event),
+  //             $template;
 
-          event.preventDefault();
+  //         event.preventDefault();
 
-          // Clear existing menus.
-          clearMessageContextMenus();
+  //         // Clear existing menus.
+  //         clearMessageContextMenus();
 
-          // Highlight the relevant message.
-          $this.addClass('highlighted');
+  //         // Highlight the relevant message.
+  //         $this.addClass('highlighted');
 
-          self._chat.getRoom(messageVars.roomId, function(room) {
-            // Show the context menu.
-            $template = $(template({
-              id: $message.data('message-id')
-            }));
-            $template.css({
-              left: event.clientX,
-              top: event.clientY
-            }).appendTo(self.$wrapper);
-          });
-        };
+  //         self._chat.getRoom(messageVars.roomId, function(room) {
+  //           // Show the context menu.
+  //           $template = $(template({
+  //             id: $message.data('message-id')
+  //           }));
+  //           $template.css({
+  //             left: event.clientX,
+  //             top: event.clientY
+  //           }).appendTo(self.$wrapper);
+  //         });
+  //       };
 
-    // Handle dismissal of message context menus (any non-right-click click event).
-    $(document).bind('click', { self: this }, function(event) {
-      if (!event.button || event.button != 2) {
-        clearMessageContextMenus();
-      }
-    });
+  //   // Handle dismissal of message context menus (any non-right-click click event).
+  //   $(document).bind('click', { self: this }, function(event) {
+  //     if (!event.button || event.button != 2) {
+  //       clearMessageContextMenus();
+  //     }
+  //   });
 
-    // Handle display of message context menus (via right-click on a message).
-    $(document).delegate('[data-class="firechat-message"]', 'contextmenu', showMessageContextMenu);
+  //   // Handle display of message context menus (via right-click on a message).
+  //   $(document).delegate('[data-class="firechat-message"]', 'contextmenu', showMessageContextMenu);
 
-    // Handle click of the 'Warn User' contextmenu item.
-    $(document).delegate('[data-event="firechat-user-warn"]', 'click', function(event) {
-      var messageVars = parseMessageVars.call(this, event);
-      self._chat.warnUser(messageVars.userId);
-    });
+  //   // Handle click of the 'Warn User' contextmenu item.
+  //   $(document).delegate('[data-event="firechat-user-warn"]', 'click', function(event) {
+  //     var messageVars = parseMessageVars.call(this, event);
+  //     self._chat.warnUser(messageVars.userId);
+  //   });
 
-    // Handle click of the 'Suspend User (1 Hour)' contextmenu item.
-    $(document).delegate('[data-event="firechat-user-suspend-hour"]', 'click', function(event) {
-      var messageVars = parseMessageVars.call(this, event);
-      self._chat.suspendUser(messageVars.userId, /* 1 Hour = 3600s */ 60*60);
-    });
+  //   // Handle click of the 'Suspend User (1 Hour)' contextmenu item.
+  //   $(document).delegate('[data-event="firechat-user-suspend-hour"]', 'click', function(event) {
+  //     var messageVars = parseMessageVars.call(this, event);
+  //     self._chat.suspendUser(messageVars.userId, /* 1 Hour = 3600s */ 60*60);
+  //   });
 
-    // Handle click of the 'Suspend User (1 Day)' contextmenu item.
-    $(document).delegate('[data-event="firechat-user-suspend-day"]', 'click', function(event) {
-      var messageVars = parseMessageVars.call(this, event);
-      self._chat.suspendUser(messageVars.userId, /* 1 Day = 86400s */ 24*60*60);
-    });
+  //   // Handle click of the 'Suspend User (1 Day)' contextmenu item.
+  //   $(document).delegate('[data-event="firechat-user-suspend-day"]', 'click', function(event) {
+  //     var messageVars = parseMessageVars.call(this, event);
+  //     self._chat.suspendUser(messageVars.userId, /* 1 Day = 86400s */ 24*60*60);
+  //   });
 
-    // Handle click of the 'Delete Message' contextmenu item.
-    $(document).delegate('[data-event="firechat-message-delete"]', 'click', function(event) {
-      var messageVars = parseMessageVars.call(this, event);
-      self._chat.deleteMessage(messageVars.roomId, messageVars.messageId);
-    });
-  };
+  //   // Handle click of the 'Delete Message' contextmenu item.
+  //   $(document).delegate('[data-event="firechat-message-delete"]', 'click', function(event) {
+  //     var messageVars = parseMessageVars.call(this, event);
+  //     self._chat.deleteMessage(messageVars.roomId, messageVars.messageId);
+  //   });
+  // };
 
   /**
    * Binds to height changes in the surrounding div.
@@ -411,102 +427,181 @@
     });
   };
 
-  /**
-   * Binds room list dropdown to populate room list on-demand.
-   */
   Man2ManChatUI.prototype._bindForRoomList = function() {
     var self = this;
 
-    $('#firechat-btn-rooms').bind('click', function() {
-      $(this).parents('.chat-group').find('button').removeClass('active');
-      $(this).addClass('active');
-      $('#firechat-unread-room-list').hide();
-      $('#firechat-tab-list').show();
-      $('.chat_search_box').css("visibility", 'inherit');
+    // var template = FirechatDefaultTemplates["templates/room-list-item.html"],
+    //     selectRoomListItem = function() {
+    //       var parent = $(this).parent(),
+    //           roomId = parent.data('room-id'),
+    //           roomName = parent.data('room-name');
 
-      if ($(this).parent().hasClass('open')) {
-        return;
+    //       if (self.$messages[roomId]) {
+    //         self.focusTab(roomId);
+    //       } else {
+    //         self._chat.enterRoom(roomId, roomName);
+    //       }
+    //       return false;
+    //     };
+
+    // self._chat.getRoomList(function(rooms) {
+    //   self.$roomList.empty();
+    //   for (var roomId in rooms) {
+    //     var room = rooms[roomId];
+    //     if (room.type != "public") continue;
+    //     room.isRoomOpen = !!self.$messages[room.id];
+    //     room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
+    //     var $roomItem = $(template(room));
+    //     $roomItem.children('a').bind('click', selectRoomListItem);
+    //     self.$roomList.append($roomItem.toggle(true));
+    //   }
+    // });
+  };
+
+  Man2ManChatUI.prototype.roomType = function( roomType ) {
+    var self = this;
+    var conf = self._roomTypeConfig[roomType];
+
+    var tab_id      = conf.tab_id || 'tab-firechat-' + conf.id + '-room-list';
+    var tabpanel_id = conf.tabpanel_id || 'tabpanel-firechat-' + conf.id + '-room-list';
+    var appendee_id = conf.appendee_id || 'appendee-firechat-' + conf.id + '-room-list';
+    var template    = conf.template || FirechatDefaultTemplates["templates/" + conf.template_name + ".html"];
+
+    return Object.assign({}, conf, {
+      template:           template,
+      tab_id:             tab_id,
+      tab_selector:       '#' + tab_id,
+      tab:                $('#' + tab_id),
+      tabpanel_id:        tabpanel_id,
+      tabpanel_selector:  '#' + tabpanel_id,
+      tabpanel:           $('#' + tabpanel_id),
+      appendee_id:        appendee_id,
+      appendee_selector:  '#' + appendee_id,
+      appendee:           $('#' + appendee_id)
+    });
+  };
+
+  // Man2ManChatUI.prototype.setRoomType = function( roomType, config ) {
+  //   var self = this;
+  //   self._roomTypeConfig[roomType] = config;
+  // };
+
+  /**
+   * Return this format of object
+   * {
+   *   id: xxx,
+   *   type: "public",
+   *   name: xxx,
+   *   isRoomOpen: false,
+   *   avatar: xxx,
+   *   ...
+   * }
+   */
+  Man2ManChatUI.prototype.normalizeRoom = function( roomId, room ) {
+    var self = this;
+    return {
+      id: roomId,
+      type: "public",
+      name: room.name ? room.name : "不明のチャット",
+      isRoomOpen: false,
+      avatar: room.avatar ? room.avatar : self._defaultAvatar,
+      roommeta: {
+        name: room.name ? room.name : "不明のチャット"
       }
+    };
+  };
 
-      var $this = $(this),
-          template = FirechatDefaultTemplates["templates/room-list-item.html"],
-          selectRoomListItem = function() {
-            var parent = $(this).parent(),
-                roomId = parent.data('room-id'),
-                roomName = parent.data('room-name');
+  Man2ManChatUI.prototype.appendRoom = function( roomType, normalizedRoom ) {
+    var self = this;
+    var $roomItem = self.makeRoomItem( roomType, normalizedRoom );
+    self.appendRoomItem( roomType, $roomItem );
+  };
 
-            if (self.$messages[roomId]) {
-              self.focusTab(roomId);
-            } else {
-              self._chat.enterRoom(roomId, roomName);
-            }
-            return false;
-          };
+  Man2ManChatUI.prototype.makeRoomItem = function( roomType, normalizedRoom ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    var $roomItem = $(roomTypeConfig.template(normalizedRoom));
+    return $roomItem;
+  };
 
-      self._chat.getRoomList(function(rooms) {
-        self.$roomList.empty();
-        for (var roomId in rooms) {
-          var room = rooms[roomId];
-          if (room.type != "public") continue;
-          room.isRoomOpen = !!self.$messages[room.id];
-          room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
-          var $roomItem = $(template(room));
-          $roomItem.children('a').bind('click', selectRoomListItem);
-          self.$roomList.append($roomItem.toggle(true));
-        }
-      });
+  Man2ManChatUI.prototype.appendRoomItem = function( roomType, $roomItem ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    roomTypeConfig.appendee.append($roomItem.toggle(true));
+  };
+
+  Man2ManChatUI.prototype.setRoomItemCount = function( roomType ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    $(roomTypeConfig.tab_selector + " .chat_count").text($(roomTypeConfig.appendee_selector + " li").length);
+  };
+
+  Man2ManChatUI.prototype.beforeLoadRoomList = function( data ) {
+    var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+    var roomTypeConfig = self.roomType(roomType);
+    if ( loadType === "replace" ) {
+      roomTypeConfig.appendee.empty();
+    }
+    return new Promise(function(resolve, reject){
+      resolve(data);
+    });
+  };
+
+  Man2ManChatUI.prototype.executeLoadRoomList = function( data ) {
+    var self = this;
+    var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+
+    return new Promise(function(resolve, reject){
+      for ( var roomId in rooms ) {
+        var room = self.normalizeRoom( roomId, rooms[roomId] );
+        if (room.type != "public") continue;
+        self.appendRoom( roomType, room );
+        // var $roomItem = self.makeRoomItem( roomType, room );
+        // self.appendRoomItem( roomType, $roomItem );
+      }
+      resolve(data);
+    });
+  };
+
+  Man2ManChatUI.prototype.afterLoadRoomList = function( data ) {
+    var self = this;
+    var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
+
+    return new Promise(function(resolve, reject){
+      self.setRoomItemCount(roomType);
+      resolve(data);
+    });
+  };
+
+  /**
+   * loadType: "replace", "append"
+   */
+  Man2ManChatUI.prototype.loadRoomList = function( roomType, rooms, loadType ) {
+    var self = this;
+    var roomTypeConfig = self.roomType(roomType);
+    loadType = loadType || "replace";
+
+    // if ( loadType === "replace" ) {
+    //   roomTypeConfig.appendee.empty();
+    // }
+
+    var data = {
+      roomType: roomType, 
+      rooms: rooms, 
+      loadType: loadType
+    };
+    self.beforeLoadRoomList( data ).then(function(data){
+      return self.executeLoadRoomList(data);
+    }).then(function(data){
+      return self.afterLoadRoomList(data);
     });
   };
 
   Man2ManChatUI.prototype._bindForUnreadRoomList = function() {
     var self = this;
-
-    $('#firechat-btn-unread-rooms').bind('click', self.selectUnreadRoom.bind(self));
-  };
-
-  Man2ManChatUI.prototype.selectUnreadRoom = function() {
-    var self = this;
-
-    var $this = $('#firechat-btn-unread-rooms');
-    $this.parents('.chat-group').find('button').removeClass('active');
-    $this.addClass('active');
-    $('#firechat-unread-room-list').show();
-    $('#firechat-tab-list').hide();
-    $('.chat_search_box').css("visibility", 'hidden');
-
-    if ($this.parent().hasClass('open')) {
-      return;
-    }
     
-    var template = FirechatDefaultTemplates["templates/room-list-item.html"],
-        selectRoomListItem = function() {
-          var parent = $(this).parent(),
-              roomId = parent.data('room-id'),
-              roomName = parent.data('room-name');
-
-          if (self.$messages[roomId]) {
-            self.focusTab(roomId);
-          } else {
-            self._chat.enterRoom(roomId, roomName);
-          }
-          return false;
-        };
-
     self._chat.getUnreadRoomList(function(rooms) {
-      self.$unreadRoomList.empty();
-      for (var roomId in rooms) {
-        var room = rooms[roomId];
-        room.id   = roomId;
-        room.type = "public";
-        room.name = room.name ? room.name : "不明のチャット";
-        room.isRoomOpen = false;
-        room.avatar = room.avatar ? room.avatar : self._defaultAvatar;
-        if (room.type != "public") continue;
-        var $roomItem = $(template(room));
-        $roomItem.children('a').bind('click', selectRoomListItem);
-        self.$unreadRoomList.append($roomItem.toggle(true));
-      }
-      $("#unread_count").text($("#firechat-unread-room-list li").length);
+      self.loadRoomList( "unread", rooms, "replace" );
     });
   };
 
@@ -643,43 +738,43 @@
   /**
    * Binds user mute toggles and removes all messages for a given user upon mute.
    */
-  Man2ManChatUI.prototype._bindForUserMuting = function() {
-    var self = this;
-    $(document).delegate('[data-event="firechat-user-mute-toggle"]', 'click', function(event) {
-      var $this = $(this),
-          userId = $this.closest('[data-user-id]').data('user-id'),
-          userName = $this.closest('[data-user-name]').data('user-name'),
-          isMuted = $this.hasClass('red'),
-          template = FirechatDefaultTemplates["templates/prompt-user-mute.html"];
+  // Man2ManChatUI.prototype._bindForUserMuting = function() {
+  //   var self = this;
+  //   $(document).delegate('[data-event="firechat-user-mute-toggle"]', 'click', function(event) {
+  //     var $this = $(this),
+  //         userId = $this.closest('[data-user-id]').data('user-id'),
+  //         userName = $this.closest('[data-user-name]').data('user-name'),
+  //         isMuted = $this.hasClass('red'),
+  //         template = FirechatDefaultTemplates["templates/prompt-user-mute.html"];
 
-      event.preventDefault();
+  //     event.preventDefault();
 
-      // Require user confirmation for muting.
-      if (!isMuted) {
-        var $prompt = self.prompt('Mute User?', template({
-          userName: userName
-        }));
+  //     // Require user confirmation for muting.
+  //     if (!isMuted) {
+  //       var $prompt = self.prompt('Mute User?', template({
+  //         userName: userName
+  //       }));
 
-        $prompt.find('a.close').first().click(function() {
-          $prompt.remove();
-          return false;
-        });
+  //       $prompt.find('a.close').first().click(function() {
+  //         $prompt.remove();
+  //         return false;
+  //       });
 
-        $prompt.find('[data-toggle=decline]').first().click(function() {
-          $prompt.remove();
-          return false;
-        });
+  //       $prompt.find('[data-toggle=decline]').first().click(function() {
+  //         $prompt.remove();
+  //         return false;
+  //       });
 
-        $prompt.find('[data-toggle=accept]').first().click(function() {
-          self._chat.toggleUserMute(userId);
-          $prompt.remove();
-          return false;
-        });
-      } else {
-        self._chat.toggleUserMute(userId);
-      }
-    });
-  };
+  //       $prompt.find('[data-toggle=accept]').first().click(function() {
+  //         self._chat.toggleUserMute(userId);
+  //         $prompt.remove();
+  //         return false;
+  //       });
+  //     } else {
+  //       self._chat.toggleUserMute(userId);
+  //     }
+  //   });
+  // };
 
   /**
    * A stripped-down version of bootstrap-tab.js.
@@ -711,6 +806,14 @@
 
           $target = $(selector);
 
+          if ( $target.length <= 0 ) {
+            var roomId = selector.replace('#', '');
+            var roomName = $el.parent().data("roomName");
+            console.log("Loading new room...", roomId, roomName);
+            self.selectUserRoom(roomId, roomName);
+            return;
+          }
+
           activate($this.parent('li'), $ul);
           activate($target, $target.parent(), function () {
             $this.trigger({
@@ -718,6 +821,7 @@
               relatedTarget: previous
             });
           });
+          showDetail($el);
         },
         activate = function (element, container, callback) {
           var $active = container.find('> .active'),
@@ -784,7 +888,7 @@
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
-      showDetail($(this));
+      // showDetail($(this));
     });
   };
 
@@ -905,11 +1009,17 @@
       return;
     }
 
-    var room = {
+    // var room = {
+    //   id: roomId,
+    //   name: roomName,
+    //   avatar: roomAvatar ? roomAvatar : self._defaultAvatar
+    // };
+    var room = self.normalizeRoom( roomId, {
       id: roomId,
+      room_id: roomId,
       name: roomName,
       avatar: roomAvatar ? roomAvatar : self._defaultAvatar
-    };
+    });
 
     // Populate and render the tab content template.
     var tabTemplate = FirechatDefaultTemplates["templates/tab-content.html"];
@@ -1021,9 +1131,9 @@
     this.$tabList.find('[data-room-id=' + roomId + ']').remove();
 
     // Dynamically update the width of each tab based upon the number open.
-    var tabs = this.$tabList.children('li');
-    var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
-    this.$tabList.children('li').css('width', tabWidth);
+    // var tabs = this.$tabList.children('li');
+    // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
+    // this.$tabList.children('li').css('width', tabWidth);
 
     // Automatically select the next tab if there is one.
     this.$tabList.find('[data-toggle="firechat-tab"]').first().trigger('click');
@@ -1199,11 +1309,6 @@
   Man2ManChatUI.prototype.setDropzoneConfig = function(config) {
     var self = this;
     self._dropzoneConfig = config;
-  };
-
-  Man2ManChatUI.prototype.setDefaultAvatar = function(avatar) {
-    var self = this;
-    self._defaultAvatar = avatar;
   };
 
 })(jQuery);

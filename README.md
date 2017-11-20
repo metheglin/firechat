@@ -119,3 +119,68 @@ return {
   }
 };
 ```
+
+### Customizing RoomType Tab
+
+```
+var chat = new Man2ManChatUI(
+  chatRef, 
+  document.getElementById("firechat-wrapper"),
+  {
+    "room_type_config": {
+      "all": {
+        "id": "all",
+        "title": "ALL",
+        "template_name": 'room-list-item',
+        "appendee_id": 'firechat-all-room-list',
+        "tab_id": 'tab-firechat-all-room-list',
+        "active": false,
+        "show_count": false
+      }
+    }
+  }
+);
+```
+
+```
+$(document).on('click', '.search', function(){
+  $.ajax({
+    url: "/room_search",
+  })
+  .done(function( rooms ) {
+    // roomsObj supposed to be like this:
+    // {
+    //   "roomid1": {
+    //     name: "abcdefg",
+    //     avatar: "https://github.com/fluidicon.png",
+    //   },
+    //   "roomid2": {
+    //     name: "metheglin",
+    //     avatar: "https://github.com/fluidicon.png",
+    //   },
+    //   "roomid3": {
+    //     name: "jjjj",
+    //     avatar: "https://github.com/fluidicon.png",
+    //   },
+    // }
+    var roomsObj = rooms.reduce((acc,room)=>{
+      acc[room.id] = room
+      return acc
+    }, {})
+
+    chat.loadRoomList( "all", roomsObj, "replace");
+  });
+})
+```
+
+### Customizing File Downloader
+
+```
+var chat = new Man2ManChatUI(
+  chatRef, 
+  document.getElementById("firechat-wrapper"),
+  {
+    "file_downloader": false,
+  }
+);
+```
