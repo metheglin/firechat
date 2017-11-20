@@ -49,7 +49,7 @@
 
     this._renderLayout();
 
-    this._defaultAvatar = 'http://api.randomuser.me/portraits/men/56.jpg';
+    this._defaultAvatar = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_ebls-UUShLJTBsclAHFxv2QYxDJIQdre45gDkFn5FEkC7JvI';
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
