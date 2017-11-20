@@ -46,9 +46,9 @@
     // Define some useful regexes.
     this.urlPattern = /\b(?:https?|ftp):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
     this.pseudoUrlPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    this._meAvatar = this._options.me_avatar || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+    this._othersAvatar = this._options.others_avatar || 'http://www.murketing.com/journal/wp-content/uploads/2009/04/yammer.gif';
 
-
-    this._defaultAvatar = this._options.default_avatar || 'http://api.randomuser.me/portraits/men/56.jpg';
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
@@ -504,7 +504,7 @@
       type: "public",
       name: room.name ? room.name : "不明のチャット",
       isRoomOpen: false,
-      avatar: room.avatar ? room.avatar : self._defaultAvatar,
+      avatar: room.avatar ? room.avatar : self._othersAvatar,
       roommeta: {
         name: room.name ? room.name : "不明のチャット"
       }
@@ -537,6 +537,7 @@
   };
 
   Man2ManChatUI.prototype.beforeLoadRoomList = function( data ) {
+    var self = this;
     var roomType = data.roomType, rooms = data.rooms, loadType = data.loadType;
     var roomTypeConfig = self.roomType(roomType);
     if ( loadType === "replace" ) {
@@ -879,7 +880,7 @@
 
         console.log("showDetail",roomMeta);
 
-        $imgAvatar.attr("src", roomMeta.Avatar ? roomMeta.Avatar : self._defaultAvatar);
+        $imgAvatar.attr("src", roomMeta.Avatar ? roomMeta.Avatar : self._othersAvatar);
         var html = Object.keys(roomMeta).reduce(function(acc,key){
           if (!roomMeta[key]) return "";
           return acc + '<li>' +
@@ -1023,7 +1024,7 @@
       id: roomId,
       room_id: roomId,
       name: roomName,
-      avatar: roomAvatar ? roomAvatar : self._defaultAvatar
+      avatar: roomAvatar ? roomAvatar : self._othersAvatar
     });
 
     // Populate and render the tab content template.
@@ -1155,19 +1156,19 @@
    */
   Man2ManChatUI.prototype.showMessage = function(roomId, rawMessage) {
     var self = this;
-
+    var isSelfMessage = (self._user && rawMessage.userId == self._user.id);
     // Setup defaults
     var message = {
       id              : rawMessage.id,
       localtime       : self.formatTime(rawMessage.timestamp),
-      avatar          : rawMessage.avatar || self._defaultAvatar,
+      avatar          : rawMessage.avatar || isSelfMessage ? self._meAvatar : self._othersAvatar,
       message         : rawMessage.message || '',
       image           : rawMessage.image || null,
       file            : rawMessage.file  || null,
       userId          : rawMessage.userId,
       name            : rawMessage.name,
       type            : rawMessage.type || 'default',
-      isSelfMessage   : (self._user && rawMessage.userId == self._user.id),
+      isSelfMessage   : isSelfMessage,
       // disableActions  : (!self._user || rawMessage.userId == self._user.id)
       disableActions  : true
     };
