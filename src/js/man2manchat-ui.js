@@ -49,7 +49,6 @@
     this._meAvatar = this._options.me_avatar || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
     this._othersAvatar = this._options.others_avatar || 'http://www.murketing.com/journal/wp-content/uploads/2009/04/yammer.gif';
 
-
     this._sendCallback = undefined;
     this._dropzoneConfig = function(roomId, roomName, uploadCallback) {
       return {
