@@ -777,6 +777,11 @@
   //   });
   // };
 
+  Man2ManChatUI.prototype.onOpenRoom = function( roomId ) {
+    var self = this;
+    // console.log("Room Opened.", roomId);
+  };
+
   /**
    * A stripped-down version of bootstrap-tab.js.
    *
@@ -889,7 +894,7 @@
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
-      // showDetail($(this));
+      self.onOpenRoom( $(this).parent().data("roomId") );
     });
   };
 
