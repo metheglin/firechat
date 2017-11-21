@@ -13,14 +13,21 @@
           id="uploader">
         </form>
       </label> -->
+      <% if(send_options.click){ %>
+      <button
+        id="send_message">
+        送信
+      </button>
+      <% } %>
       <button
         id="btn-mark-read-<%- id %>">
         既読にする
       </button>
+      <div class="clearfix"></div>
     </div>
     <textarea class="form-control input-sm" id="textarea<%- id %>" cols="100" rows="5"></textarea>
   </div>
-  <p class="instruction text-right"><small>[Shift + Enter]で改行できます</small></p>
+  <% if(send_options.enter){ %><p class="instruction text-right"><small>[Shift + Enter]で改行できます</small></p><% } %>
 
 
 </div>
