@@ -1032,10 +1032,11 @@
       name: roomName,
       avatar: roomAvatar ? roomAvatar : self._othersAvatar
     });
+    var allow_markasread = ("allow_markasread" in self._options) ? self._options.allow_markasread : true;
 
     // Populate and render the tab content template.
     var tabTemplate = FirechatDefaultTemplates["templates/tab-content.html"];
-    var $tabContent = $(tabTemplate(Object.assign({},room,{send_options: self._options.send_options})));
+    var $tabContent = $(tabTemplate(Object.assign({},room,{send_options: self._options.send_options, allow_markasread: allow_markasread })));
     this.$tabContent.prepend($tabContent);
     var $messages = $('#firechat-messages' + roomId);
     var $btnMarkRead = $("#btn-mark-read-" + roomId);

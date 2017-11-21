@@ -19,10 +19,12 @@
         送信
       </button>
       <% } %>
+      <% if(allow_markasread){ %>
       <button
         id="btn-mark-read-<%- id %>">
         既読にする
       </button>
+      <% } %>
       <div class="clearfix"></div>
     </div>
     <textarea class="form-control input-sm" id="textarea<%- id %>" cols="100" rows="5"></textarea>
