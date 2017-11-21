@@ -511,7 +511,6 @@
       name: room.name ? room.name : "不明のチャット",
       isRoomOpen: false,
       avatar: room.avatar ? room.avatar : self._othersAvatar,
-      send_options: self._options.send_options,
       roommeta: {
         name: room.name ? room.name : "不明のチャット"
       }
@@ -1036,7 +1035,7 @@
 
     // Populate and render the tab content template.
     var tabTemplate = FirechatDefaultTemplates["templates/tab-content.html"];
-    var $tabContent = $(tabTemplate(room));
+    var $tabContent = $(tabTemplate(Object.assign({},room,{send_options: self._options.send_options})));
     this.$tabContent.prepend($tabContent);
     var $messages = $('#firechat-messages' + roomId);
     var $btnMarkRead = $("#btn-mark-read-" + roomId);
