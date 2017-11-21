@@ -826,7 +826,7 @@
             return;
           }
 
-          activate($this.parent('li'), $ul);
+          // activate($this.parent('li'), $ul);
           activate($target, $target.parent(), function () {
             $this.trigger({
               type: 'shown',
