@@ -108,6 +108,12 @@
       history: {}
     };
 
+    if ("send_options" in this._options) {
+      this._options.send_options.enter = this._options.send_options.enter || false;
+      this._options.send_options.click = this._options.send_options.click || false;
+    }else{
+      this._options.send_options = {"enter": true, "click": false};
+    }
     // Setup UI bindings for chat controls.
     this._bindUIEvents();
 
@@ -1029,7 +1035,7 @@
 
     // Populate and render the tab content template.
     var tabTemplate = FirechatDefaultTemplates["templates/tab-content.html"];
-    var $tabContent = $(tabTemplate(room));
+    var $tabContent = $(tabTemplate(Object.assign({},room,{send_options: self._options.send_options})));
     this.$tabContent.prepend($tabContent);
     var $messages = $('#firechat-messages' + roomId);
     var $btnMarkRead = $("#btn-mark-read-" + roomId);
@@ -1042,7 +1048,7 @@
     $textarea.bind('keydown', function(e) {
       self._chat.typingSignal(roomId);
       var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
-      if ((e.which === 13) && (message !== '')) {
+      if (self._options.send_options.enter && (e.which === 13) && (message !== '')) {
         if(!e.shiftKey){
           $textarea.val('');
           self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
@@ -1054,6 +1060,19 @@
         }
       }
     });
+    // on-click event to send button.
+    if(self._options.send_options.click){
+      $('#send_message').on('click', function(){
+        var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
+        self._chat.sendMessage(roomId, message, null, self._sendCallback.bind(self, {
+          roomId: roomId,
+          roomName: roomName,
+          message: message
+        }));
+        $textarea.val('');
+        return false;
+      });
+    }
 
     // Initialize Image Uploader
     var myDropzone = new Dropzone("#panel-message", self._dropzoneConfig(roomId, roomName, function( url ) {
