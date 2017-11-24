@@ -1108,10 +1108,11 @@
     // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
     // this.$tabList.children('li').css('width', tabWidth);
     self._chat.getTypingSignal(roomId, function(id, data){
-      $("#typingSignal").html("");
-      $("#typingSignal").append("<small id='"+id+"'>"+data.name+" is Typing... </small>");
+      var roomBoxID = '#'.concat(roomId);
+      $(roomBoxID).find(".typingSignal").html("");
+      $(roomBoxID).find(".typingSignal").append("<small id='"+id+"'>"+data.name+" is Typing... </small>");
       setTimeout(function(){
-        $("#typingSignal").find('#'+id).remove();
+        $(roomBoxID).find(".typingSignal").find('#'+id).remove();
       }, 1000);
     });
 

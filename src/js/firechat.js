@@ -686,7 +686,7 @@
       id: this._userId,
       name: this._userName
     });
-    this._typingSignal.child(roomId).remove();
+    this._typingSignal.child(roomId).child(signal.key).remove();
   };
 
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
@@ -696,6 +696,7 @@
         if (childSnapshot.val().id != self._userId) {
           cb(childSnapshot.key, childSnapshot.val());
         }
+        self._typingSignal.child(roomId).child(childSnapshot.key).remove();
       });
 
     });
