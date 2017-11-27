@@ -681,12 +681,19 @@
     this._staffUnreadRoomsRef.child(roomId).remove();
   };
 
+  var removeSignal;
   Firechat.prototype.typingSignal = function(roomId) {
-    var signal = this._typingSignal.child(roomId).push({
+    var self = this;
+    var signal = this._typingSignal.child(roomId).child(this._userId).set({
       id: this._userId,
-      name: this._userName
+      name: this._userName,
+      updated_at: this.makeDateTime()
     });
-    this._typingSignal.child(roomId).child(signal.key).remove();
+
+    clearTimeout(removeSignal);
+    removeSignal = setTimeout(function() {
+      self._typingSignal.child(roomId).child(self._userId).remove();
+    }, 2000);
   };
 
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
@@ -696,9 +703,22 @@
         if (childSnapshot.val().id != self._userId) {
           cb(childSnapshot.key, childSnapshot.val());
         }
-        self._typingSignal.child(roomId).child(childSnapshot.key).remove();
-      });
+        var removeSignalTime = self.makeDateTime(new Date(new Date(childSnapshot.val().updated_at).getTime() + 5*60000));
+        var timeoutSecond = (new Date(removeSignalTime).getTime() - new Date(self.makeDateTime()).getTime()) / 1000 * 1000;
 
+        setTimeout(function() {
+          self._typingSignal.child(roomId).child(childSnapshot.key).remove();
+        }, timeoutSecond);
+      });
     });
+  };
+
+  Firechat.prototype.makeDateTime = function(newDate){
+    var today = (newDate) ? newDate : new Date();
+
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+    return dateTime;
   };
 })();
