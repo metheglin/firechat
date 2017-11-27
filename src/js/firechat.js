@@ -687,7 +687,7 @@
     var signal = this._typingSignal.child(roomId).child(this._userId).set({
       id: this._userId,
       name: this._userName,
-      updated_at: this.makeDateTime()
+      timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 
     clearTimeout(removeSignal);
@@ -702,13 +702,8 @@
       snapshot.forEach(function(childSnapshot) {
         if (childSnapshot.val().id != self._userId) {
           cb(childSnapshot.key, childSnapshot.val());
-        }
-        var removeSignalTime = self.makeDateTime(new Date(new Date(childSnapshot.val().updated_at).getTime() + 5*60000));
-        var timeoutSecond = (new Date(removeSignalTime).getTime() - new Date(self.makeDateTime()).getTime()) / 1000 * 1000;
-
-        setTimeout(function() {
           self._typingSignal.child(roomId).child(childSnapshot.key).remove();
-        }, timeoutSecond);
+        }
       });
     });
   };
