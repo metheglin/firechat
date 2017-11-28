@@ -681,23 +681,24 @@
     this._staffUnreadRoomsRef.child(roomId).remove();
   };
 
+  var removeSignal;
   Firechat.prototype.typingSignal = function(roomId) {
-    var signal = this._typingSignal.child(roomId).push({
+    var self = this;
+    var signal = this._typingSignal.child(roomId).child(this._userId).set({
       id: this._userId,
-      name: this._userName
+      name: this._userName,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
     });
-    this._typingSignal.child(roomId).child(signal.key).remove();
+
+    clearTimeout(removeSignal);
+    removeSignal = setTimeout(function() {
+      self._typingSignal.child(roomId).child(self._userId).remove();
+    }, 2000);
   };
 
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
-    var self = this;
     this._typingSignal.child(roomId).on('value', function(snapshot) {
-      snapshot.forEach(function(childSnapshot) {
-        if (childSnapshot.val().id != self._userId) {
-          cb(childSnapshot.key, childSnapshot.val());
-        }
-      });
-
+      cb(snapshot);
     });
   };
 })();

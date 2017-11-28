@@ -1120,13 +1120,21 @@
     var tabs = this.$tabList.children('li');
     // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
     // this.$tabList.children('li').css('width', tabWidth);
-    self._chat.getTypingSignal(roomId, function(id, data){
-      $("#typingSignal").html("");
-      $("#typingSignal").append("<small id='"+id+"'>"+data.name+" is Typing... </small>");
-      setTimeout(function(){
-        $("#typingSignal").find('#'+id).remove();
-      }, 1000);
+    self._chat.getTypingSignal(roomId, function(signals){
+      var roomBoxID = '#'.concat(roomId);
+      var typing = Object.values(signals.val()).filter(function(signal){
+        return (signal.id != self._chat._userId) && signal_available_check(signal.timestamp);
+      });
+      $(roomBoxID).find(".typingSignal").html("");
+      $.each(typing, function(id, value){
+        $(roomBoxID).find(".typingSignal").append("<small id='"+id+"'>"+value.name+" is Typing... </small>");
+      });
     });
+
+    var signal_available_check = function(timestamp){
+      var time_diff = (new Date().getTime() - timestamp) / 1000;
+      return time_diff < 60 ? true : false;
+    };
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');
