@@ -836,7 +836,6 @@
               relatedTarget: previous
             });
           });
-          showDetail($el);
         },
         activate = function (element, container, callback) {
           var $active = container.find('> .active'),
@@ -884,6 +883,13 @@
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
+      // If it tries to newly open a room, it fetches the room data asynchronously from firebase.
+      // So that "click" '[data-toggle="firechat-tab"]' event is explicitly fired after getting a room,
+      // and it can't get the meta data any longer.
+      // In order to recognize the 2 type of event we have to check `originalEvent` here.
+      if ( event.originalEvent ) {
+        showDetail($(this));
+      }
       self.onOpenRoom( $(this).parent().data("roomId") );
     });
   };
