@@ -1108,15 +1108,26 @@
     // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
     // this.$tabList.children('li').css('width', tabWidth);
     var displaySignal;
-    self._chat.getTypingSignal(roomId, function(id, data){
+    self._chat.getTypingSignal(roomId, function(signals){
       var roomBoxID = '#'.concat(roomId);
+      var typing = Object.values(signals.val()).filter(function(signal){
+        return (signal.id != self._chat._userId) && signal_available_check(signal.timestamp);
+      });
       $(roomBoxID).find(".typingSignal").html("");
-      $(roomBoxID).find(".typingSignal").append("<small id='"+id+"'>"+data.name+" is Typing... </small>");
-      clearTimeout(displaySignal);
-      displaySignal = setTimeout(function(){
-        $(roomBoxID).find(".typingSignal").find('#'+id).remove();
-      }, 2000);
+      $.each(typing, function(id, value){
+        $(roomBoxID).find(".typingSignal").append("<small id='"+id+"'>"+value.name+" is Typing... </small>");
+
+        clearTimeout(displaySignal);
+        displaySignal = setTimeout(function(){
+          $(roomBoxID).find(".typingSignal").find('#'+id).remove();
+        }, 2000);
+      });
     });
+
+    var signal_available_check = function(timestamp){
+      var time_diff = (new Date().getTime() - timestamp) / 1000;
+      return time_diff < 300 ? true : false;
+    };
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');

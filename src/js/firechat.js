@@ -697,14 +697,8 @@
   };
 
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
-    var self = this;
     this._typingSignal.child(roomId).on('value', function(snapshot) {
-      snapshot.forEach(function(childSnapshot) {
-        if (childSnapshot.val().id != self._userId) {
-          cb(childSnapshot.key, childSnapshot.val());
-          self._typingSignal.child(roomId).child(childSnapshot.key).remove();
-        }
-      });
+      cb(snapshot);
     });
   };
 })();
