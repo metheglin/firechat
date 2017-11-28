@@ -704,7 +704,8 @@
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
     var self = this;
     this._typingSignalRef.child(roomId).on('value', function(snapshot) {
-      self._typingSignals[roomId] = Object.values(snapshot.val());
+      var list = snapshot.val() || [];
+      self._typingSignals[roomId] = Object.values(list);
       cb(self._typingSignals[roomId]);
     });
   };

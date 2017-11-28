@@ -1025,6 +1025,7 @@
   Man2ManChatUI.prototype.initRoomTypingSignal = function( roomId ) {
     var self = this;
     var filterValidSignals = function(signals) {
+      if ( ! signals || signals.length <= 0 ) return [];
       var signal_available_check = function(timestamp){
         var time_diff = (new Date().getTime() - timestamp) / 1000;
         return time_diff < 60 ? true : false;
