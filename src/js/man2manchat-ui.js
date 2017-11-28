@@ -43,6 +43,9 @@
     this.maxLengthMessage = 1500;
     this.maxUserSearchResults = 100;
 
+    // Timers
+    this._typingSignalRefreshTimer = null;
+
     // Define some useful regexes.
     this.urlPattern = /\b(?:https?|ftp):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
     this.pseudoUrlPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
@@ -1019,6 +1022,37 @@
     $('#firechat-input-name').prop('disabled', !isEnabled);
   };
 
+  Man2ManChatUI.prototype.initRoomTypingSignal = function( roomId ) {
+    var self = this;
+    var filterValidSignals = function(signals) {
+      var signal_available_check = function(timestamp){
+        var time_diff = (new Date().getTime() - timestamp) / 1000;
+        return time_diff < 60 ? true : false;
+      };
+      return signals.filter(function(signal){
+        return (signal.id != self._chat._userId) && signal_available_check(signal.timestamp);
+      });
+    };
+
+    self._chat.getTypingSignal(roomId, function(signals){
+      var filteredSignals = filterValidSignals( signals );
+      self.renderTypingSignal( roomId, filteredSignals );
+    });
+
+    self._typingSignalRefreshTimer = setInterval(function(){
+      var filteredSignals = filterValidSignals( self._chat._typingSignals[roomId] );
+      self.renderTypingSignal( roomId, filteredSignals );
+    }, 30000);
+  };
+
+  Man2ManChatUI.prototype.renderTypingSignal = function( roomId, signals ) {
+    var self = this;
+    var signalText = (signals.length > 0) ?
+      signals.map(function(s){ return s.name; }).join(", ") + "が入力中..." :
+      "";
+    $('#'.concat(roomId)).find(".typingSignal").html( signalText );
+  };
+
   /**
    * Given a room id and name, attach the tab to the interface and setup events.
    *
@@ -1120,21 +1154,8 @@
     var tabs = this.$tabList.children('li');
     // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
     // this.$tabList.children('li').css('width', tabWidth);
-    self._chat.getTypingSignal(roomId, function(signals){
-      var roomBoxID = '#'.concat(roomId);
-      var typing = Object.values(signals.val()).filter(function(signal){
-        return (signal.id != self._chat._userId) && signal_available_check(signal.timestamp);
-      });
-      $(roomBoxID).find(".typingSignal").html("");
-      $.each(typing, function(id, value){
-        $(roomBoxID).find(".typingSignal").append("<small id='"+id+"'>"+value.name+" is Typing... </small>");
-      });
-    });
-
-    var signal_available_check = function(timestamp){
-      var time_diff = (new Date().getTime() - timestamp) / 1000;
-      return time_diff < 60 ? true : false;
-    };
+    
+    self.initRoomTypingSignal( roomId );
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');

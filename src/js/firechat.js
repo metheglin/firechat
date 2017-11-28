@@ -43,6 +43,8 @@
     // A mapping of operations to re-queue on disconnect.
     this._presenceBits = {};
 
+    this._typingSignals = {};
+
     // Commonly-used Firebase references.
     this._userRef        = null;
     this._messageRef     = this._firechatRef.child('room-messages');
@@ -52,7 +54,7 @@
     this._suspensionsRef = this._firechatRef.child('suspensions');
     this._usersOnlineRef = this._firechatRef.child('user-names-online');
     this._staffUnreadRoomsRef = this._firechatRef.child('staff-unread-rooms');
-    this._typingSignal = this._firechatRef.child('room-typing-signal');
+    this._typingSignalRef = this._firechatRef.child('room-typing-signal');
 
     // Setup and establish default options.
     this._options = options || {};
@@ -687,7 +689,7 @@
   var removeSignal;
   Firechat.prototype.typingSignal = function(roomId) {
     var self = this;
-    var signal = this._typingSignal.child(roomId).child(this._userId).set({
+    var signal = this._typingSignalRef.child(roomId).child(this._userId).set({
       id: this._userId,
       name: this._userName,
       timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -695,13 +697,15 @@
 
     clearTimeout(removeSignal);
     removeSignal = setTimeout(function() {
-      self._typingSignal.child(roomId).child(self._userId).remove();
+      self._typingSignalRef.child(roomId).child(self._userId).remove();
     }, 2000);
   };
 
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
-    this._typingSignal.child(roomId).on('value', function(snapshot) {
-      cb(snapshot);
+    var self = this;
+    this._typingSignalRef.child(roomId).on('value', function(snapshot) {
+      self._typingSignals[roomId] = Object.values(snapshot.val());
+      cb(self._typingSignals[roomId]);
     });
   };
 })();
