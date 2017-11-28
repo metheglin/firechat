@@ -1120,7 +1120,7 @@
 
     var signal_available_check = function(timestamp){
       var time_diff = (new Date().getTime() - timestamp) / 1000;
-      return time_diff < 300 ? true : false;
+      return time_diff < 60 ? true : false;
     };
 
     // Update the room listing to reflect that we're now in the room.
