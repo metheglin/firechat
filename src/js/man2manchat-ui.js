@@ -826,7 +826,7 @@
             return;
           }
 
-          activate($this.parent('li'), $ul);
+          // activate($this.parent('li'), $ul);
           activate($target, $target.parent(), function () {
             $this.trigger({
               type: 'shown',
@@ -871,30 +871,11 @@
           $active.removeClass('in');
       },
       showDetail = function($el){
-        var $this = $el,
-            $imgAvatar = $("#chat_right").find(".roommeta-avatar"),
-            $ulTable = $("#chat_right").find(".roommeta-table");
-        var roomMeta = Object.keys($this.parent().data()).reduce(function(acc,key){
-          if ( key.match(/^roommeta/) ) {
-            var shortkey = key.replace("roommeta", "");
-            if ( shortkey !== "Avatar" ) {
-              acc[shortkey] = $this.parent().data()[key];
-            }
-          }
-          return acc;
-        }, {});
-
-        console.log("showDetail",roomMeta);
-
-        $imgAvatar.attr("src", roomMeta.Avatar ? roomMeta.Avatar : self._othersAvatar);
-        var html = Object.keys(roomMeta).reduce(function(acc,key){
-          if (!roomMeta[key]) return "";
-          return acc + '<li>' +
-            '<span class="col-sm-3">' + key + '</span>' +
-            '<strong>' + roomMeta[key] + '</strong>' +
-            '</li>';
-        }, "");
-        $ulTable.html(html);
+        var $this = $el;
+            
+        var roomData = $this.parent().data();
+        var normalizedData = self.normalizeRoomDetailData(roomData);
+        self.renderRoomDetail(normalizedData);
       };
 
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
@@ -902,6 +883,38 @@
       show($(this));
       self.onOpenRoom( $(this).parent().data("roomId") );
     });
+  };
+
+  Man2ManChatUI.prototype.normalizeRoomDetailData = function( roomData ) {
+    var self = this;
+    var roomMeta = Object.keys(roomData).reduce(function(acc,key){
+      if ( key.match(/^roommeta/) ) {
+        var shortkey = key.replace("roommeta", "");
+        if ( shortkey !== "Avatar" ) {
+          acc[shortkey] = roomData[key];
+        }
+      }
+      return acc;
+    }, {});
+
+    return {
+      avatar: roomData.roommetaAvatar ? roomData.roommetaAvatar : self._othersAvatar,
+      roomMeta: roomMeta
+    };
+  };
+
+  Man2ManChatUI.prototype.renderRoomDetail = function( normalizedData ) {
+    var $imgAvatar = $("#chat_right").find(".roommeta-avatar");
+    var $ulTable = $("#chat_right").find(".roommeta-table");
+    
+    $imgAvatar.attr("src", normalizedData.avatar);
+    var roomMeta = normalizedData.roomMeta;
+    var html = Object.keys(roomMeta).reduce(function(acc,key){
+      if (!roomMeta[key]) return "";
+      var template = FirechatDefaultTemplates["templates/detail-column.html"];
+      return acc + template({key: key, value: roomMeta[key]});
+    }, "");
+    $ulTable.html(html);
   };
 
   /**
@@ -1032,10 +1045,11 @@
       name: roomName,
       avatar: roomAvatar ? roomAvatar : self._othersAvatar
     });
+    var allow_markasread = ("allow_markasread" in self._options) ? self._options.allow_markasread : true;
 
     // Populate and render the tab content template.
     var tabTemplate = FirechatDefaultTemplates["templates/tab-content.html"];
-    var $tabContent = $(tabTemplate(Object.assign({},room,{send_options: self._options.send_options})));
+    var $tabContent = $(tabTemplate(Object.assign({},room,{send_options: self._options.send_options, allow_markasread: allow_markasread })));
     this.$tabContent.prepend($tabContent);
     var $messages = $('#firechat-messages' + roomId);
     var $btnMarkRead = $("#btn-mark-read-" + roomId);
