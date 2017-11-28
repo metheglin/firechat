@@ -425,6 +425,9 @@
       }
       return;
     }
+    if (!messageContent.trim()) {
+      return;
+    }
 
     newMessageRef = self._messageRef.child(roomId).push();
     newMessageRef.setWithPriority(message, firebase.database.ServerValue.TIMESTAMP, cb);
