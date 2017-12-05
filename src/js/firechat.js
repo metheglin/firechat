@@ -43,6 +43,8 @@
     // A mapping of operations to re-queue on disconnect.
     this._presenceBits = {};
 
+    this._typingSignals = {};
+
     // Commonly-used Firebase references.
     this._userRef        = null;
     this._messageRef     = this._firechatRef.child('room-messages');
@@ -52,7 +54,7 @@
     this._suspensionsRef = this._firechatRef.child('suspensions');
     this._usersOnlineRef = this._firechatRef.child('user-names-online');
     this._staffUnreadRoomsRef = this._firechatRef.child('staff-unread-rooms');
-    this._typingSignal = this._firechatRef.child('room-typing-signal');
+    this._typingSignalRef = this._firechatRef.child('room-typing-signal');
 
     // Setup and establish default options.
     this._options = options || {};
@@ -425,6 +427,9 @@
       }
       return;
     }
+    if (!messageContent.trim()) {
+      return;
+    }
 
     newMessageRef = self._messageRef.child(roomId).push();
     newMessageRef.setWithPriority(message, firebase.database.ServerValue.TIMESTAMP, cb);
@@ -681,23 +686,27 @@
     this._staffUnreadRoomsRef.child(roomId).remove();
   };
 
+  var removeSignal;
   Firechat.prototype.typingSignal = function(roomId) {
-    var signal = this._typingSignal.child(roomId).push({
+    var self = this;
+    var signal = this._typingSignalRef.child(roomId).child(this._userId).set({
       id: this._userId,
-      name: this._userName
+      name: this._userName,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
     });
-    this._typingSignal.child(roomId).child(signal.key).remove();
+
+    clearTimeout(removeSignal);
+    removeSignal = setTimeout(function() {
+      self._typingSignalRef.child(roomId).child(self._userId).remove();
+    }, 2000);
   };
 
   Firechat.prototype.getTypingSignal = function(roomId, cb) {
     var self = this;
-    this._typingSignal.child(roomId).on('value', function(snapshot) {
-      snapshot.forEach(function(childSnapshot) {
-        if (childSnapshot.val().id != self._userId) {
-          cb(childSnapshot.key, childSnapshot.val());
-        }
-      });
-
+    this._typingSignalRef.child(roomId).on('value', function(snapshot) {
+      var list = snapshot.val() || [];
+      self._typingSignals[roomId] = Object.values(list);
+      cb(self._typingSignals[roomId]);
     });
   };
 })();

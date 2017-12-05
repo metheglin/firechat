@@ -43,6 +43,9 @@
     this.maxLengthMessage = 1500;
     this.maxUserSearchResults = 100;
 
+    // Timers
+    this._typingSignalRefreshTimer = null;
+
     // Define some useful regexes.
     this.urlPattern = /\b(?:https?|ftp):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
     this.pseudoUrlPattern = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
@@ -833,7 +836,6 @@
               relatedTarget: previous
             });
           });
-          showDetail($el);
         },
         activate = function (element, container, callback) {
           var $active = container.find('> .active'),
@@ -881,6 +883,13 @@
     $(document).delegate('[data-toggle="firechat-tab"]', 'click', function(event) {
       event.preventDefault();
       show($(this));
+      // If it tries to newly open a room, it fetches the room data asynchronously from firebase.
+      // So that "click" '[data-toggle="firechat-tab"]' event is explicitly fired after getting a room,
+      // and it can't get the meta data any longer.
+      // In order to recognize the 2 type of event we have to check `originalEvent` here.
+      if ( event.originalEvent ) {
+        showDetail($(this));
+      }
       self.onOpenRoom( $(this).parent().data("roomId") );
     });
   };
@@ -1019,6 +1028,38 @@
     $('#firechat-input-name').prop('disabled', !isEnabled);
   };
 
+  Man2ManChatUI.prototype.initRoomTypingSignal = function( roomId ) {
+    var self = this;
+    var filterValidSignals = function(signals) {
+      if ( ! signals || signals.length <= 0 ) return [];
+      var signal_available_check = function(timestamp){
+        var time_diff = (new Date().getTime() - timestamp) / 1000;
+        return time_diff < 60 ? true : false;
+      };
+      return signals.filter(function(signal){
+        return (signal.id != self._chat._userId) && signal_available_check(signal.timestamp);
+      });
+    };
+
+    self._chat.getTypingSignal(roomId, function(signals){
+      var filteredSignals = filterValidSignals( signals );
+      self.renderTypingSignal( roomId, filteredSignals );
+    });
+
+    self._typingSignalRefreshTimer = setInterval(function(){
+      var filteredSignals = filterValidSignals( self._chat._typingSignals[roomId] );
+      self.renderTypingSignal( roomId, filteredSignals );
+    }, 30000);
+  };
+
+  Man2ManChatUI.prototype.renderTypingSignal = function( roomId, signals ) {
+    var self = this;
+    var signalText = (signals.length > 0) ?
+      signals.map(function(s){ return s.name; }).join(", ") + "が入力中..." :
+      "";
+    $('#'.concat(roomId)).find(".typingSignal").html( signalText );
+  };
+
   /**
    * Given a room id and name, attach the tab to the interface and setup events.
    *
@@ -1120,13 +1161,8 @@
     var tabs = this.$tabList.children('li');
     // var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
     // this.$tabList.children('li').css('width', tabWidth);
-    self._chat.getTypingSignal(roomId, function(id, data){
-      $("#typingSignal").html("");
-      $("#typingSignal").append("<small id='"+id+"'>"+data.name+" is Typing... </small>");
-      setTimeout(function(){
-        $("#typingSignal").find('#'+id).remove();
-      }, 1000);
-    });
+    
+    self.initRoomTypingSignal( roomId );
 
     // Update the room listing to reflect that we're now in the room.
     this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');
