@@ -1230,7 +1230,7 @@
     var message = {
       id              : rawMessage.id,
       localtime       : self.formatTime(rawMessage.timestamp),
-      avatar          : rawMessage.avatar || isSelfMessage ? self._meAvatar : self._othersAvatar,
+      avatar          : rawMessage.avatar ? rawMessage.avatar : (isSelfMessage ? self._meAvatar : self._othersAvatar),
       message         : rawMessage.message || '',
       image           : rawMessage.image || null,
       file            : rawMessage.file  || null,
